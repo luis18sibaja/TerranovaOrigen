@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyección del Proyecto: Plan de Capacitación Integral</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f7f9;
+        }
+        .kpi-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .content-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-left-color 0.3s ease;
+            border-left-width: 4px;
+            border-left-color: transparent;
+        }
+        .timeline-block:hover .content-card {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .timeline-block.color-general:hover .content-card { border-left-color: #118AB2; }
+        .timeline-block.color-terranova:hover .content-card { border-left-color: #FF6B6B; }
+        .timeline-block.color-origen:hover .content-card { border-left-color: #FFD166; }
+        .timeline-block.color-roles:hover .content-card { border-left-color: #06D6A0; }
+        .timeline-block.color-final:hover .content-card { border-left-color: #073B4C; }
+
+        .timeline-block {
+            border-left: 3px solid;
+            padding-left: 1.5rem;
+            padding-bottom: 2rem;
+            position: relative;
+        }
+        .timeline-block:last-child {
+            padding-bottom: 0;
+        }
+        .timeline-dot {
+            position: absolute;
+            left: -11px;
+            top: 0;
+            width: 20px;
+            height: 20px;
+            border-radius: 9999px;
+            background-color: white;
+            border: 4px solid;
+        }
+        .color-origen { border-color: #FFD166; }
+        .text-origen { color: #FFD166; }
+        .color-terranova { border-color: #FF6B6B; }
+        .text-terranova { color: #FF6B6B; }
+        .color-general { border-color: #118AB2; }
+        .text-general { color: #118AB2; }
+        .color-roles { border-color: #06D6A0; }
+        .text-roles { color: #06D6A0; }
+        .color-final { border-color: #073B4C; }
+        .text-final { color: #073B4C; }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <header class="bg-white shadow-md sticky top-0 z-20">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-[#073B4C]">Proyecto de Capacitación Integral</h1>
+                    <p class="text-sm text-gray-500">Integración de Equipos y Procesos: Terranova & Origen</p>
+                </div>
+                <div class="text-right">
+                    <span class="font-semibold text-[#118AB2]">Agosto 2025</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-5xl">
+
+        <section id="kpis" class="mb-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="kpi-card p-4 text-center">
+                    <p class="text-3xl font-extrabold text-[#118AB2]">10</p>
+                    <p class="text-sm text-gray-600">Sesiones Totales</p>
+                </div>
+                <div class="kpi-card p-4 text-center">
+                    <p class="text-3xl font-extrabold text-[#118AB2]">14.5</p>
+                    <p class="text-sm text-gray-600">Horas de Formación</p>
+                </div>
+                <div class="kpi-card p-4 text-center">
+                    <p class="text-3xl font-extrabold text-[#118AB2]">5</p>
+                    <p class="text-sm text-gray-600">Audiencias Clave</p>
+                </div>
+                <div class="kpi-card p-4 text-center">
+                    <p class="text-3xl font-extrabold text-[#118AB2]">2</p>
+                    <p class="text-sm text-gray-600">Semanas Intensivas</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="strategic-overview" class="mb-10">
+             <div class="content-card p-6">
+                <h3 class="text-2xl font-bold mb-4 text-[#073B4C]">Visión Estratégica del Proyecto</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-semibold text-gray-800 text-lg">Objetivos Estratégicos</h4>
+                        <ul class="space-y-2 text-gray-700 text-sm mt-2">
+                            <li class="flex items-start"><span class="mr-3 text-lg text-[#118AB2]">🎯</span><span><strong>Alinear</strong> a todo el personal en un único proceso operativo, eliminando silos y promoviendo una visión compartida.</span></li>
+                            <li class="flex items-start"><span class="mr-3 text-lg text-[#118AB2]">⚙️</span><span><strong>Estandarizar</strong> el uso de herramientas críticas (Monday, Toursys, Safri) para garantizar la consistencia de los datos y la eficiencia operativa.</span></li>
+                            <li class="flex items-start"><span class="mr-3 text-lg text-[#118AB2]">🤝</span><span><strong>Integrar</strong> cultural y operativamente a los equipos de Terranova y Origen, fomentando un espíritu de colaboración y un solo equipo.</span></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-800 text-lg">Beneficios Tangibles para el Negocio</h4>
+                        <ul class="space-y-2 text-gray-700 text-sm mt-2">
+                             <li class="flex items-start"><span class="mr-3 text-lg text-[#06D6A0]">✔️</span><span>Reducción de errores y retrabajos al unificar procedimientos y flujos de datos.</span></li>
+                            <li class="flex items-start"><span class="mr-3 text-lg text-[#06D6A0]">✔️</span><span>Mejora en la eficiencia y tiempos de respuesta al cliente, desde la cotización hasta la operación.</span></li>
+                            <li class="flex items-start"><span class="mr-3 text-lg text-[#06D6A0]">✔️</span><span>Mayor autonomía y confianza del personal en sus roles, permitiendo una toma de decisiones más ágil.</span></li>
+                             <li class="flex items-start"><span class="mr-3 text-lg text-[#06D6A0]">✔️</span><span>Facilita la colaboración y comunicación fluida entre áreas, creando una base sólida para el crecimiento futuro.</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="charts" class="mb-10">
+            <h2 class="text-2xl font-bold text-[#073B4C] mb-6">Análisis de Distribución del Tiempo</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                 <div class="content-card p-6">
+                    <h3 class="text-xl font-bold mb-4 text-center text-[#073B4C]">Inversión de Tiempo por Sistema</h3>
+                    <div class="chart-container" style="position: relative; height:280px; width:100%">
+                        <canvas id="systemChart"></canvas>
+                    </div>
+                </div>
+                <div class="content-card p-6">
+                    <h3 class="text-xl font-bold mb-4 text-center text-[#073B4C]">Distribución de Horas por Tema</h3>
+                    <div class="chart-container" style="position: relative; height:280px; width:100%">
+                        <canvas id="topicChart"></canvas>
+                    </div>
+                </div>
+                <div class="md:col-span-2 content-card p-6">
+                    <h3 class="text-xl font-bold mb-4 text-center text-[#073B4C]">Foco de Capacitación por Audiencia</h3>
+                     <div class="chart-container" style="position: relative; height:300px; width:100%">
+                        <canvas id="audienceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="timeline">
+            <h2 class="text-2xl font-bold text-[#073B4C] mb-6">Cronograma Detallado de Capacitaciones</h2>
+            
+            <div class="mb-10">
+                <h3 class="text-xl font-semibold mb-4 text-gray-700">Semana 1: Fundamentos y Procesos Centrales</h3>
+                <div class="timeline-block color-general">
+                    <div class="timeline-dot color-general"></div>
+                    <p class="font-semibold text-general">Lunes, 5 de Agosto</p>
+                    <div class="content-card p-4 mt-2">
+                        <h4 class="font-bold text-lg">1. Visión General del Proceso y Ecosistema</h4>
+                        <div class="flex justify-between text-sm my-2">
+                            <span class="font-semibold text-gray-700">👥 Todo el equipo</span>
+                            <span class="font-semibold text-gray-700">⏰ 1.5 horas</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-2">Introducción al flujo de trabajo unificado. Temas a cubrir:</p>
+                        <ul class="list-disc list-inside text-sm text-gray-500 mt-2 space-y-1">
+                            <li>Flujo completo: Desde la captación del lead hasta el cierre contable.</li>
+                            <li>Presentación del ecosistema de herramientas de apoyo:</li>
+                            <li class="ml-4">Panel de accesos centralizado.</li>
+                            <li class="ml-4">Power App para control de proveedores.</li>
+                            <li class="ml-4">Mapa interactivo de ubicaciones.</li>
+                            <li class="ml-4">Repositorio de manuales y documentación.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="timeline-block color-general">
+                    <div class="timeline-dot color-general"></div>
+                    <p class="font-semibold text-general">Martes, 6 de Agosto</p>
+                    <div class="content-card p-4 mt-2">
+                        <h4 class="font-bold text-lg">2. Gestión de Proyectos en Monday.com</h4>
+                        <div class="flex justify-between text-sm my-2">
+                            <span class="font-semibold text-gray-700">👥 Todo el equipo</span>
+                            <span class="font-semibold text-gray-700">⏰ 1 hora</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-2">Uso práctico de Monday para la gestión diaria. Temas a cubrir:</p>
+                        <ul class="list-disc list-inside text-sm text-gray-500 mt-2 space-y-1">
+                            <li>Creación de un lead y su ciclo de vida.</li>
+                            <li>Uso de tableros, columnas de estado y asignaciones.</li>
+                            <li>Seguimiento de tareas y comunicación interna.</li>
+                            <li>Cómo se integra Monday con el resto del proceso.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="timeline-block color-terranova">
+                    <div class="timeline-dot color-terranova"></div>
+                    <p class="font-semibold text-terranova">Miércoles, 7 de Agosto</p>
+                    <div class="content-card p-4 mt-2">
+                        <h4 class="font-bold text-lg">3. Nuevo Proceso de Facturación (Terranova)</h4>
+                        <div class="flex justify-between text-sm my-2">
+                            <span class="font-semibold text-gray-700">👥 Equipo Terranova</span>
+                            <span class="font-semibold text-gray-700">⏰ 1 hora</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-2">Adaptación al nuevo sistema de facturación. Temas a cubrir:</p>
+                        <ul class="list-disc list-inside text-sm text-gray-500 mt-2 space-y-1">
+                            <li>Paso a paso del nuevo proceso de facturación.</li>
+                            <li>Manejo de leads antiguos vs. nuevos.</li>
+                            <li>Cambios en los formularios de solicitud.</li>
+                            <li>Ajustes en la herramienta de comisiones de Excel.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="timeline-block color-origen">
+                    <div class="timeline-dot color-origen"></div>
+                    <p class="font-semibold text-origen">Jueves, 8 de Agosto</p>
+                    <div class="content-card p-4 mt-2">
+                        <h4 class="font-bold text-lg">4. Capacitación Toursys (Sesión 1 de 3)</h4>
+                        <div class="flex justify-between text-sm my-2">
+                            <span class="font-semibold text-gray-700">👥 Equipo Origen</span>
+                            <span class="font-semibold text-gray-700">⏰ 1 hora</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-2"><strong>Módulo 1: Aspectos Generales.</strong> Temas a cubrir:</p>
+                        <ul class="list-disc list-inside text-sm text-gray-500 mt-2 space-y-1">
+                            <li>Navegación por la interfaz principal y aspectos generales del sistema.</li>
+                            <li>Búsqueda y consulta de Proveedores, servicios y clientes.</li>
+                            <li>Vistazo general de todo el ecosistema sin entrar en detalles.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="timeline-block color-origen">
+                    <div class="timeline-dot color-origen"></div>
+                    <p class="font-semibold text-origen">Viernes, 9 de Agosto</p>
+                    <div class="content-card p-4 mt-2">
+                        <h4 class="font-bold text-lg">5. Capacitación Toursys (Sesión 2 de 3)</h4>
+                        <div class="flex justify-between text-sm my-2">
+                            <span class="font-semibold text-gray-700">👥 Equipo Origen</span>
+                            <span class="font-semibold text-gray-700">⏰ 2 horas</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-2"><strong>Módulo 2: Creación de Cotización.</strong> Temas a cubrir:</p>
+                        <ul class="list-disc list-inside text-sm text-gray-500 mt-2 space-y-1">
+                            <li>Uso de formularios de solicitud de ingresos.</li>
+                            <li>Proceso detallado para crear una cotización.</li>
+                            <li>Manejo de servicios, tarifas y markups.</li>
+                            <li>Aplicación de herramienta de comisiones de Excel.</li>
+                            <li>Aplicación de la herramienta web de cálculo de fee.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-xl font-semibold mb-4 text-gray-700">Semana 2: Especialización y Práctica</h3>
+                <div class="timeline-block color-origen">
+                    <div class="timeline-dot color-origen"></div>
+                    <p class="font-semibold text-origen">Lunes, 12 de Agosto</p>
+                    <div class="content-card p-4 mt-2">
+                        <h4 class="font-bold text-lg">6. Capacitación Toursys (Sesión 3 de 3)</h4>
+                        <div class="flex justify-between text-sm my-2">
+                            <span class="font-semibold text-gray-700">👥 Equipo Origen</span>
+                            <span class="font-semibold text-gray-700">⏰ 2 horas</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-2"><strong>Módulo 3: Reserva y Factura.</strong> Temas a cubrir:</p>
+                        <ul class="list-disc list-inside text-sm text-gray-500 mt-2 space-y-1">
+                            <li>Conversión de cotización a reserva.</li>
+                            <li>Generación de facturas proforma y finales.</li>
+                            <li>Vistazo al módulo de Operaciones desde la reserva.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="timeline-block color-roles">
+                    <div class="timeline-dot color-roles"></div>
+                    <p class="font-semibold text-roles">Martes, 13 de Agosto</p>
+                    <div class="content-card p-4 mt-2">
+                        <h4 class="font-bold text-lg">7. Capacitación para Puesto Administrativo</h4>
+                        <div class="flex justify-between text-sm my-2">
+                            <span class="font-semibold text-gray-700">👥 Puesto Administrativo</span>
+                            <span class="font-semibold text-gray-700">⏰ 1 hora</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-2">Tareas y responsabilidades del día a día. Temas a cubrir:</p>
+                         <ul class="list-disc list-inside text-sm text-gray-500 mt-2 space-y-1">
+                            <li>Cierre de cotización.</li>
+                            <li>Seguimiento de anticipos registrados por Contabilidad.</li>
+                            <li>Proceso de facturación detallado.</li>
+                            <li>Traslado a Monday el margen de utilidad del lead facturado.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="timeline-block color-roles">
+                    <div class="timeline-dot color-roles"></div>
+                    <p class="font-semibold text-roles">Miércoles, 14 de Agosto</p>
+                    <div class="content-card p-4 mt-2">
+                        <h4 class="font-bold text-lg">8. Capacitación para Equipo de Operaciones</h4>
+                        <div class="flex justify-between text-sm my-2">
+                            <span class="font-semibold text-gray-700">👥 Equipo de Operaciones</span>
+                            <span class="font-semibold text-gray-700">⏰ 1.5 horas</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-2">Flujo de trabajo detallado de operaciones. Temas a cubrir:</p>
+                        <ul class="list-disc list-inside text-sm text-gray-500 mt-2 space-y-1">
+                            <li>Recepción y control de una reserva confirmada.</li>
+                            <li>Proceso de reconfirmación de servicios con proveedores.</li>
+                            <li>Generación y envío de vouchers a clientes y proveedores (Para cuando sea requerido).</li>
+                            <li>Manejo del checklist de control de operaciones.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="timeline-block color-general">
+                    <div class="timeline-dot color-general"></div>
+                    <p class="font-semibold text-general">Jueves, 15 de Agosto</p>
+                    <div class="content-card p-4 mt-2">
+                        <h4 class="font-bold text-lg">9. Capacitación de Safri</h4>
+                        <div class="flex justify-between text-sm my-2">
+                            <span class="font-semibold text-gray-700">👥 Equipo de Ventas</span>
+                            <span class="font-semibold text-gray-700">⏰ 1.5 horas</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-2">Uso de Safri para la creación de itinerarios. Temas a cubrir:</p>
+                        <ul class="list-disc list-inside text-sm text-gray-500 mt-2 space-y-1">
+                            <li>Configuración de filtros para usar contenido propio.</li>
+                            <li>Creación de itinerarios desde plantillas Terranova/Origen.</li>
+                            <li>Adición de alojamientos y actividades.</li>
+                            <li>Publicación y compartición de itinerarios.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="timeline-block color-final">
+                    <div class="timeline-dot color-final"></div>
+                    <p class="font-semibold text-final">Viernes, 16 de Agosto</p>
+                    <div class="content-card p-4 mt-2">
+                        <h4 class="font-bold text-lg">10. Taller Práctico y Retroalimentación</h4>
+                        <div class="flex justify-between text-sm my-2">
+                            <span class="font-semibold text-gray-700">👥 Todo el equipo</span>
+                            <span class="font-semibold text-gray-700">⏰ 2 horas</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-2">Cierre del ciclo de capacitación. Temas a cubrir:</p>
+                        <ul class="list-disc list-inside text-sm text-gray-500 mt-2 space-y-1">
+                            <li>Simulación de un caso práctico de principio a fin.</li>
+                            <li>Sesión abierta de preguntas y respuestas.</li>
+                            <li>Recopilación de feedback para mejoras del proceso.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        Chart.register(ChartDataLabels);
+
+        const wrapLabel = (label, maxWidth) => {
+            const words = label.split(' ');
+            const lines = [];
+            let currentLine = '';
+            words.forEach(word => {
+                if ((currentLine + ' ' + word).length > maxWidth) {
+                    lines.push(currentLine);
+                    currentLine = word;
+                } else {
+                    currentLine += (currentLine ? ' ' : '') + word;
+                }
+            });
+            lines.push(currentLine);
+            return lines;
+        };
+
+        const tooltipTitleCallback = (tooltipItems) => {
+            const item = tooltipItems[0];
+            let label = item.chart.data.labels[item.dataIndex];
+            if (Array.isArray(label)) {
+              return label.join(' ');
+            }
+            return label;
+        };
+        
+        const audienceData = {
+            labels: ['Equipo Origen', 'Todo el equipo', 'Equipo de Operaciones', 'Equipo de Ventas', 'Puesto Administrativo', 'Equipo Terranova'],
+            datasets: [{
+                label: 'Horas de Capacitación',
+                data: [5, 4.5, 1.5, 1.5, 1, 1],
+                backgroundColor: ['#FFD166', '#118AB2', '#06D6A0', '#4ECDC4', '#2E86C1', '#FF6B6B'],
+                borderWidth: 0
+            }]
+        };
+        new Chart(document.getElementById('audienceChart'), {
+            type: 'bar',
+            data: audienceData,
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { title: tooltipTitleCallback } }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Horas Totales' }
+                    },
+                    y: {
+                        ticks: {
+                            callback: function(value, index, values) {
+                                return wrapLabel(this.getLabelForValue(value), 16);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        const topicData = {
+            labels: ['Toursys', 'Proceso General y Taller', 'Roles (Ops/Admin)', 'Safri', 'Monday', 'Facturación'],
+            datasets: [{
+                label: 'Horas por Tema',
+                data: [5, 3.5, 2.5, 1.5, 1, 1],
+                backgroundColor: ['#FFD166', '#118AB2', '#06D6A0', '#4ECDC4', '#264653', '#FF6B6B'],
+                borderColor: '#FFFFFF',
+                borderWidth: 2
+            }]
+        };
+        new Chart(document.getElementById('topicChart'), {
+            type: 'doughnut',
+            data: topicData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: { callbacks: { title: tooltipTitleCallback } },
+                    datalabels: {
+                        formatter: (value, ctx) => {
+                            return value + 'h';
+                        },
+                        color: '#fff',
+                        font: {
+                            weight: 'bold'
+                        }
+                    }
+                }
+            }
+        });
+
+        const systemData = {
+            labels: ['Toursys', 'Procesos y Herramientas Base', 'Safri', 'Monday'],
+            datasets: [{
+                label: 'Horas por Sistema',
+                data: [5, 3.5, 1.5, 1],
+                backgroundColor: ['#FFD166', '#118AB2', '#4ECDC4', '#264653'],
+                borderWidth: 0
+            }]
+        };
+        new Chart(document.getElementById('systemChart'), {
+            type: 'bar',
+            data: systemData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { title: tooltipTitleCallback } }
+                },
+                 scales: {
+                    x: {
+                        ticks: {
+                            maxRotation: 0,
+                            minRotation: 0,
+                            autoSkip: false
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Horas de Capacitación' }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
