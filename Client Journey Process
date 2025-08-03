@@ -1,0 +1,2776 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma de Procesos Corporativa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #EADFCE;
+            --sidebar-bg: #ffffff;
+            --card-bg: #ffffff;
+            --text-primary: #1A2633;
+            --text-secondary: #5c6a78;
+            --border-color: #e2e8f0;
+            --accent-color: #006D82;
+            --accent-hover: #005565;
+            --success-color: #7D9B5B;
+            --danger-color: #e03131;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            height: 100vh;
+        }
+
+        .sidebar {
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 2rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-nav {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .admin-mode .sidebar-nav a {
+            cursor: grab;
+            padding: 0.5rem;
+            align-items: flex-start;
+        }
+
+        .sidebar-nav a:hover {
+            background-color: #f1f3f5;
+            color: var(--text-primary);
+        }
+
+        .sidebar-nav a.active {
+            background-color: var(--accent-color);
+            color: white;
+            box-shadow: 0 4px 14px rgba(0, 109, 130, 0.3);
+        }
+        .sidebar-nav a.active .bilingual-input {
+            color: var(--text-primary);
+        }
+
+
+        .sidebar-nav a.dragging,
+        .step-card.dragging {
+            opacity: 0.5;
+            background-color: #e2e8f0;
+        }
+
+        .admin-mode .sidebar-nav a:hover .phase-actions {
+            opacity: 1;
+        }
+
+        .phase-actions {
+            position: absolute;
+            right: 0.5rem;
+            top: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .phase-actions button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 5px;
+            width: 24px;
+            height: 24px;
+        }
+
+        .sidebar-nav a:not(.active) .phase-actions button {
+            color: var(--text-secondary);
+            background: transparent;
+        }
+
+        .sidebar-nav a:not(.active) .phase-actions button:hover {
+            background: #e9ecef;
+        }
+
+        .content {
+            padding: 2rem 3rem;
+            overflow-y: auto;
+        }
+
+        .phase-section {
+            padding-top: 4rem;
+            margin-top: -4rem;
+        }
+
+        .phase-section+.phase-section {
+            margin-top: 2rem;
+        }
+
+        .step-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            transition: all 0.2s ease;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .admin-mode .step-card {
+            cursor: grab;
+        }
+
+        .step-card.dragging {
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            border-color: var(--accent-color);
+        }
+
+        .step-card-header {
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .step-card-body {
+            padding: 1.5rem;
+            flex-grow: 1;
+        }
+
+        .bilingual-input {
+            width: 100%;
+            padding: 0.25rem 0.5rem;
+            border: 1px solid transparent;
+            border-radius: 0.375rem;
+            transition: all 0.2s ease;
+        }
+        .admin-mode .bilingual-input {
+            border-color: var(--border-color);
+        }
+        .admin-mode .bilingual-input:focus {
+            outline: 2px solid var(--accent-color);
+            border-color: var(--accent-color);
+            background-color: white;
+        }
+        .bilingual-input-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            background-color: var(--success-color);
+            color: white;
+            padding: 0.35rem 0.85rem;
+            border-radius: 9999px;
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        .tag.has-link {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .tag.has-link:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn {
+            padding: 0.6rem 1.25rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.875rem;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #6a824c;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c92a2a;
+        }
+
+        .btn-secondary {
+            background-color: #e9ecef;
+            color: var(--text-secondary);
+        }
+
+        .btn-secondary:hover {
+            background-color: #dee2e6;
+        }
+
+        #code-output {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #1A2633;
+            color: #EADFCE;
+            border: none;
+        }
+
+        .drag-handle {
+            color: #cbd5e0;
+            transition: color 0.2s ease;
+        }
+
+        .admin-mode .step-card:hover .drag-handle,
+        .admin-mode .sidebar-nav a:hover .drag-handle {
+            color: var(--text-secondary);
+        }
+
+        .password-modal.shake {
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+
+            10%,
+            90% {
+                transform: translate3d(-1px, 0, 0);
+            }
+
+            20%,
+            80% {
+                transform: translate3d(2px, 0, 0);
+            }
+
+            30%,
+            50%,
+            70% {
+                transform: translate3d(-4px, 0, 0);
+            }
+
+            40%,
+            60% {
+                transform: translate3d(4px, 0, 0);
+            }
+        }
+
+        .admin-only-item {
+            display: none;
+        }
+
+        .admin-mode .admin-only-item {
+            display: flex;
+        }
+
+        /* Use flex for label alignment */
+        .detail-toggle:checked~.dot,
+        .image-toggle:checked~.dot,
+        .lang-toggle:checked~.dot {
+            transform: translateX(1.5rem);
+        }
+
+        .detail-toggle:checked~.block,
+        .image-toggle:checked~.block,
+        .lang-toggle:checked~.block {
+            background-color: var(--success-color);
+        }
+
+        .field-label {
+            color: var(--success-color);
+        }
+
+        /* Modal base styles */
+        .modal-container {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .modal-container.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+
+        .modal-container.visible .modal-content {
+            transform: scale(1);
+        }
+
+        /* Custom select styling */
+        .custom-select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+
+        /* Tool Selector Dropdown */
+        .tool-selector {
+            position: absolute;
+            z-index: 100;
+            background-color: white;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .tool-selector-item {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+        }
+
+        .tool-selector-item:hover {
+            background-color: #f1f3f5;
+        }
+
+        /* --- IMAGE GALLERY STYLES --- */
+        .image-gallery-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .image-thumbnail {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid var(--border-color);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .image-thumbnail:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .image-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .delete-image-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background-color: rgba(224, 49, 49, 0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            font-size: 12px;
+        }
+
+        .admin-mode .image-thumbnail:hover .delete-image-btn {
+            opacity: 1;
+        }
+
+        .add-image-btn {
+            width: 80px;
+            height: 80px;
+            border: 2px dashed var(--border-color);
+            color: var(--text-secondary);
+            background-color: #f8f9fa;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .add-image-btn:hover {
+            background-color: #e9ecef;
+            color: var(--text-primary);
+        }
+
+        /* --- REDESIGNED IMAGE VIEWER STYLES --- */
+        #image-viewer-modal .modal-content {
+            max-width: 90vw;
+            max-height: 90vh;
+            background-color: transparent;
+            box-shadow: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        #image-viewer-content {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        #image-viewer-img {
+            max-width: 100%;
+            max-height: 85vh;
+            object-fit: contain;
+            border-radius: 0.75rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        #image-viewer-description {
+            position: absolute;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 0.75rem 1.5rem;
+            background-color: rgba(26, 38, 51, 0.75);
+            border-radius: 0.5rem;
+            width: max-content;
+            max-width: 70%;
+            text-align: center;
+            color: white;
+            font-size: 1rem;
+            line-height: 1.5;
+            backdrop-filter: blur(4px);
+        }
+
+        .carousel-nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: transparent;
+            color: white;
+            border: none;
+            width: 60px;
+            height: 60px;
+            font-size: 2.25rem;
+            cursor: pointer;
+            transition: transform 0.2s ease, color 0.2s ease;
+            z-index: 60;
+            filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.5));
+        }
+
+        .carousel-nav-btn:hover {
+            color: #f1f3f5;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        #image-viewer-prev {
+            left: 1rem;
+        }
+
+        #image-viewer-next {
+            right: 1rem;
+        }
+
+        #close-image-viewer {
+            position: absolute;
+            top: -0.5rem;
+            right: -0.5rem;
+            color: white;
+            font-size: 2rem;
+            z-index: 60;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.5));
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+
+        #close-image-viewer:hover {
+            color: #f1f3f5;
+            transform: scale(1.1) rotate(90deg);
+        }
+        
+        /* --- PROCESS TABLE STYLES --- */
+        #table-content {
+            background-color: #f9fafb;
+        }
+        .process-table {
+            width: 100%;
+            border-collapse: collapse;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            background-color: white;
+        }
+        .process-table th, .process-table td {
+            border: 1px solid #e5e7eb;
+            padding: 12px;
+            text-align: left;
+            vertical-align: top;
+            font-size: 14px;
+        }
+        .process-table th {
+            background-color: #f3f4f6;
+            font-weight: 600;
+            color: #374151;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .process-table tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+        .process-table .phase-header {
+            background-color: #4f46e5;
+            color: white;
+            font-size: 1.25rem;
+            font-weight: bold;
+            text-align: center;
+            position: sticky;
+            top: 50px; /* Height of the table header */
+        }
+        .process-table td p {
+            margin: 0;
+            padding: 0;
+        }
+        .process-table td p:not(:last-child) {
+            margin-bottom: 0.25rem;
+        }
+    </style>
+</head>
+
+<body id="app-body" class="">
+
+    <div class="main-grid">
+        <aside class="sidebar">
+            <div class="flex items-center gap-3 mb-8">
+                <i class="fas fa-sitemap text-3xl" style="color: var(--accent-color);"></i>
+                <div>
+                    <h1 class="text-lg font-extrabold" style="color: var(--text-primary);" data-translate-key="mainTitle"></h1>
+                    <p class="text-sm" style="color: var(--text-secondary);" data-translate-key="mainSubtitle"></p>
+                </div>
+            </div>
+
+             <div id="language-switcher-container" class="mb-4"></div>
+
+            <nav id="sidebar-nav" class="sidebar-nav space-y-2"></nav>
+
+            <div class="mt-8 pt-4 border-t border-gray-200">
+                <div id="admin-controls" class="hidden">
+                    <div class="space-y-3">
+                        <button id="add-phase-btn" class="w-full btn btn-primary" data-translate-key="addPhase">
+                        </button>
+                        <button id="parameters-btn" class="w-full btn btn-primary" style="background-color: var(--text-secondary);" data-translate-key="parameters">
+                        </button>
+                        <button id="generate-code-btn" class="w-full btn btn-success" data-translate-key="saveChanges">
+                        </button>
+                    </div>
+                    <div class="mt-6">
+                        <label for="change-password-input" class="block text-sm font-bold text-gray-500 mb-2" data-translate-key="changePasswordLabel"></label>
+                        <div class="flex gap-2 items-center">
+                            <input type="text" id="change-password-input" data-translate-key-placeholder="newPasswordPlaceholder" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-color">
+                            <button id="change-password-btn" class="btn btn-primary" data-translate-key-title="savePasswordTitle"><i class="fas fa-key"></i></button>
+                            <button id="lock-admin-mode-btn" class="btn border-2" data-translate-key-title="lockAdminModeTitle" style="border-color: var(--text-secondary); color: var(--text-secondary);"><i class="fas fa-lock"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div id="unsaved-indicator" class="mt-4 text-center text-sm text-yellow-600 hidden">
+                    <i class="fas fa-exclamation-triangle"></i> <span data-translate-key="unsavedChanges"></span>
+                </div>
+                <div id="lock-container" class="mt-auto flex justify-start gap-4">
+                    <button id="lock-btn" class="text-gray-400 hover:text-accent-color transition-colors" data-translate-key-title="editModeTitle">
+                        <i class="fas fa-cog fa-2x"></i>
+                    </button>
+                    <button id="view-table-btn" class="text-gray-400 hover:text-accent-color transition-colors" data-translate-key-title="tableViewTitle">
+                        <i class="fas fa-table fa-2x"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <main id="process-content-cards" class="content">
+            <div id="process-content">
+                <!-- El contenido del proceso se generará aquí -->
+            </div>
+        </main>
+        
+        <main id="table-content" class="content hidden">
+            <!-- La tabla del proceso se generará aquí -->
+        </main>
+    </div>
+
+    <!-- MODALES -->
+    <div id="password-modal-container" class="modal-container">
+        <div class="modal-content password-modal">
+            <button id="close-password-modal" class="absolute top-0 right-0 mt-4 mr-4 text-gray-400 hover:text-gray-600 transition-colors">
+                <i class="fas fa-times fa-lg"></i>
+            </button>
+            <div class="p-8">
+                <h2 class="text-2xl font-bold text-center mb-2" data-translate-key="editModeTitle"></h2>
+                <p class="text-center text-gray-500 mb-6" data-translate-key="passwordModalSubtitle"></p>
+                <form id="password-form">
+                    <input type="password" id="password-input" class="w-full px-4 py-3 border border-gray-300 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-accent-color" data-translate-key-placeholder="passwordPlaceholder">
+                    <p id="password-error" class="text-red-500 text-sm text-center mt-2 h-5"></p>
+                    <button type="submit" class="w-full btn btn-primary mt-4" data-translate-key="unlock"></button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="substep-modal-container" class="modal-container">
+        <div class="modal-content w-full max-w-5xl h-[90vh] flex flex-col">
+            <div class="p-5 flex justify-between items-center border-b bg-gray-50 rounded-t-xl">
+                <h2 id="substep-modal-title" class="text-2xl font-bold"></h2>
+                <button id="close-substep-modal" class="text-gray-500 hover:text-red-600"><i class="fas fa-times fa-2x"></i></button>
+            </div>
+            <div id="substep-list" class="p-6 flex-grow overflow-y-auto space-y-4 bg-gray-100">
+                <!-- Los subpasos se generarán aquí -->
+            </div>
+            <div id="substep-modal-footer" class="p-4 bg-gray-50 border-t rounded-b-xl" style="display: none;">
+                <button id="add-substep-btn" class="btn btn-primary admin-only-item" data-translate-key="addSubstep"></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="code-modal" class="modal-container">
+        <div class="modal-content w-full max-w-4xl h-[90vh] flex flex-col">
+            <div class="p-5 flex justify-between items-center border-b">
+                <h2 class="text-2xl font-bold" data-translate-key="codeModalTitle"></h2>
+                <button class="close-code-modal text-gray-500 hover:text-red-600"><i class="fas fa-times fa-2x"></i></button>
+            </div>
+            <div class="p-6 flex-grow flex flex-col">
+                <p class="mb-4 text-gray-600" data-translate-key="codeModalSubtitle"></p>
+                <textarea id="code-output" class="w-full h-full flex-grow rounded-md p-4" readonly=""></textarea>
+            </div>
+            <div class="p-4 bg-gray-50 border-t flex justify-end gap-4">
+                <button id="copy-code-btn" class="btn btn-primary" data-translate-key="copyToClipboard"></button>
+                <button id="download-code-btn" class="btn btn-success" data-translate-key="downloadHTML"></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirmation-modal-container" class="modal-container">
+        <div class="modal-content p-6">
+            <h3 id="confirmation-modal-title" class="text-xl font-bold mb-2"></h3>
+            <p id="confirmation-modal-text" class="text-gray-600 mb-6"></p>
+            <div class="flex justify-end gap-3">
+                <button id="cancel-action-btn" class="btn btn-secondary" data-translate-key="cancel"></button>
+                <button id="confirm-action-btn" class="btn btn-danger" data-translate-key="confirm"></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="alert-modal-container" class="modal-container">
+        <div class="modal-content p-6 text-center">
+            <h3 id="alert-modal-title" class="text-xl font-bold mb-2"></h3>
+            <p id="alert-modal-text" class="text-gray-600 mb-6"></p>
+            <button id="ok-alert-btn" class="btn btn-primary" data-translate-key="ok"></button>
+        </div>
+    </div>
+
+    <div id="parameters-modal-container" class="modal-container">
+        <div class="modal-content w-full max-w-6xl h-[90vh] flex flex-col p-0">
+            <div class="p-5 flex justify-between items-center border-b sticky top-0 bg-white z-10">
+                <h2 class="text-2xl font-bold" data-translate-key="parametersModalTitle"></h2>
+                <button id="close-parameters-modal" class="text-gray-500 hover:text-red-600"><i class="fas fa-times fa-2x"></i></button>
+            </div>
+            <div class="p-6 flex-grow overflow-y-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Tools Column -->
+                <section>
+                    <h3 class="text-xl font-bold mb-4" data-translate-key="toolsTitle"></h3>
+                    <div id="tools-list" class="space-y-2 mb-4"></div>
+                    <form id="add-tool-form" class="p-3 bg-gray-100 rounded-lg space-y-2">
+                        <input type="text" id="new-tool-name-es" data-translate-key-placeholder="namePlaceholderES" class="w-full p-2 border rounded" required="">
+                        <input type="text" id="new-tool-name-en" data-translate-key-placeholder="namePlaceholderEN" class="w-full p-2 border rounded" required="">
+                        <input type="url" id="new-tool-link" data-translate-key-placeholder="linkPlaceholder" class="w-full p-2 border rounded">
+                        <button type="submit" class="btn btn-primary w-full" data-translate-key="addTool"></button>
+                    </form>
+                </section>
+                <!-- Roles Column -->
+                <section>
+                    <h3 class="text-xl font-bold mb-4" data-translate-key="rolesTitle"></h3>
+                    <div id="roles-list" class="space-y-2 mb-4"></div>
+                    <form id="add-role-form" class="p-3 bg-gray-100 rounded-lg space-y-2">
+                        <input type="text" id="new-role-name-es" data-translate-key-placeholder="namePlaceholderES" class="w-full p-2 border rounded" required="">
+                        <input type="text" id="new-role-name-en" data-translate-key-placeholder="namePlaceholderEN" class="w-full p-2 border rounded" required="">
+                        <button type="submit" class="btn btn-primary w-full mt-2" data-translate-key="addRole"></button>
+                    </form>
+                </section>
+                <!-- KPIs Column -->
+                <section>
+                    <h3 class="text-xl font-bold mb-4" data-translate-key="kpisTitle"></h3>
+                    <div id="kpis-list" class="space-y-2 mb-4"></div>
+                    <form id="add-kpi-form" class="p-3 bg-gray-100 rounded-lg space-y-2">
+                         <input type="text" id="new-kpi-name-es" data-translate-key-placeholder="namePlaceholderES" class="w-full p-2 border rounded" required="">
+                         <input type="text" id="new-kpi-name-en" data-translate-key-placeholder="namePlaceholderEN" class="w-full p-2 border rounded" required="">
+                        <button type="submit" class="btn btn-primary w-full mt-2" data-translate-key="addKpi"></button>
+                    </form>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW: Image Viewer Modal -->
+    <div id="image-viewer-modal" class="modal-container">
+        <div class="modal-content">
+            <div id="image-viewer-content">
+                <button id="close-image-viewer" data-translate-key-title="close"><i class="fas fa-times"></i></button>
+                <button id="image-viewer-prev" class="carousel-nav-btn" data-translate-key-title="previous" style="display: flex;"><i class="fas fa-chevron-left"></i></button>
+                <img id="image-viewer-img" src="" alt="">
+                <div id="image-viewer-description" class="p-4">
+                     <!-- Bilingual description fields will be injected here -->
+                </div>
+                <button id="image-viewer-next" class="carousel-nav-btn" data-translate-key-title="next" style="display: flex;"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden file input for image uploads -->
+    <input type="file" id="image-file-input" accept="image/*" multiple class="hidden">
+
+
+    <!-- **** DATA STRUCTURE **** -->
+    <script id="app-data" type="application/json">
+        {
+            "password": "terraorigen1",
+            "parameters": {
+                "roles": [
+                    { "id": "role_1", "name": { "es": "Supervisor", "en": "Supervisor" } },
+                    { "id": "role_2", "name": { "es": "Diseñador Líder", "en": "Lead Designer" } },
+                    { "id": "role_3", "name": { "es": "Producto y Sistemas", "en": "Product & Systems" } },
+                    { "id": "role_4", "name": { "es": "Reservaciones", "en": "Reservations" } },
+                    { "id": "role_5", "name": { "es": "Reservas", "en": "Bookings" } },
+                    { "id": "role_6", "name": { "es": "Contabilidad", "en": "Accounting" } },
+                    { "id": "role_7", "name": { "es": "Asistente Administrativo", "en": "Administrative Assistant" } },
+                    { "id": "role_8", "name": { "es": "Operaciones", "en": "Operations" } }
+                ],
+                "kpis": [
+                    { "id": "kpi_1", "name": { "es": "Dentro de 4 horas posterior a recibir el lead", "en": "Within 4 hours of receiving the lead" } },
+                    { "id": "kpi_2", "name": { "es": "Dentro de 12 horas posterior a recibir el lead", "en": "Within 12 hours of receiving the lead" } },
+                    { "id": "kpi_3", "name": { "es": "Completar todos los campos necesarios en Monday", "en": "Complete all necessary fields in Monday.com" } },
+                    { "id": "kpi_4", "name": { "es": "Dentro de 12 horas posterior a recibir la asignación del lead", "en": "Within 12 hours of receiving the lead assignment" } },
+                    { "id": "kpi_5", "name": { "es": "Calidad de la comunicación, considerando el profesionalismo, la empatía y el valor de las mejoras propuestas al itinerario.", "en": "Quality of communication, considering professionalism, empathy, and the value of proposed itinerary improvements" } },
+                    { "id": "kpi_6", "name": { "es": "Crear la estructura del itinerario según necesidades del cliente", "en": "Create the itinerary structure according to the client's needs" } },
+                    { "id": "kpi_7", "name": { "es": "Dentro de 2 horas posterior a recibir la asignación del lead", "en": "Within 2 hours of receiving the lead assignment" } },
+                    { "id": "kpi_8", "name": { "es": "Dentro de 3 horas posterior a recibir la solicitud", "en": "Within 3 hours of receiving the request" } },
+                    { "id": "kpi_9", "name": { "es": "Prontitud en la Solicitud de Disponibilidad", "en": "Promptness in the Availability Request" } },
+                    { "id": "kpi_10", "name": { "es": "Dentro de 2 horas posterior a recibir la solicitud", "en": "Within 2 hours of receiving the request" } },
+                    { "id": "kpi_11", "name": { "es": "Construir una propuesta de cotización rentable, creativa y con proveedores de alta calidad", "en": "Build a profitable, creative quote proposal with high-quality suppliers" } },
+                    { "id": "kpi_12", "name": { "es": "Crear la estructura del itinerario según necesidades del cliente/agente", "en": "Create the itinerary structure according to the client/agent's needs" } },
+                    { "id": "kpi_13", "name": { "es": "Envío de propuesta de cotización de forma exacta y completa, sin ningún error de redacción o contenido.", "en": "Accurate and complete delivery of the quote proposal, with no writing or content errors" } },
+                    { "id": "kpi_14", "name": { "es": "Dentro de 2 horas posterior al envío de la propuesta de cotización", "en": "Within 2 hours after sending the quote proposal" } },
+                    { "id": "kpi_15", "name": { "es": "Eficiencia en la Aplicación de Ajustes", "en": "Efficiency in Applying Adjustments" } },
+                    { "id": "kpi_16", "name": { "es": "Dentro de 24 horas posterior a recibir la solicitud de ajustes.", "en": "Within 24 hours of receiving the adjustment request" } },
+                    { "id": "kpi_17", "name": { "es": "Actualización precisa del estado del lead en tiempo real", "en": "Accurate, real-time update of the lead status" } },
+                    { "id": "kpi_18", "name": { "es": "Número promedio de versiones de propuesta de cotización por cliente/agente", "en": "Average number of quote proposal versions per client/agent" } },
+                    { "id": "kpi_19", "name": { "es": "Dentro de 24 horas posterior a la confirmación del cliente/agente", "en": "Within 24 hours of client/agent confirmation" } },
+                    { "id": "kpi_20", "name": { "es": "Dentro de 3 horas posterior a la solicitud de apertura", "en": "Within 3 hours of the opening request" } },
+                    { "id": "kpi_21", "name": { "es": "Dentro de 12 horas posterior a la confirmación del cliente/agente", "en": "Within 12 hours of client/agent confirmation" } },
+                    { "id": "kpi_22", "name": { "es": "Dentro de 48 horas posterior a la solicitud de reserva", "en": "Within 48 hours of the reservation request" } },
+                    { "id": "kpi_23", "name": { "es": "Según políticas de pago establecidas por el proveedor", "en": "According to payment policies established by the supplier" } },
+                    { "id": "kpi_24", "name": { "es": "Realizar los pagos correspondientes en el momento oportuno", "en": "Make corresponding payments in a timely manner" } },
+                    { "id": "kpi_25", "name": { "es": "Dentro de 72 horas posterior a la confirmación del cliente/agente", "en": "Within 72 hours of client/agent confirmation" } },
+                    { "id": "kpi_26", "name": { "es": "Garantizar la integridad de la documentación del cliente/agente", "en": "Ensure the integrity of the client/agent's documentation" } },
+                    { "id": "kpi_27", "name": { "es": "Dentro de 7 días posterior a la confirmación del cliente/agente", "en": "Within 7 days of client/agent confirmation" } },
+                    { "id": "kpi_28", "name": { "es": "Dentro de 72 horas posteriores al recibo del pago", "en": "Within 72 hours of receiving the payment" } },
+                    { "id": "kpi_29", "name": { "es": "Agendar y notificar correctamente cada plazo de pago", "en": "Correctly schedule and notify for each payment deadline" } },
+                    { "id": "kpi_30", "name": { "es": "Dentro de 96 horas después de la confirmación del pago", "en": "Within 96 hours after payment confirmation" } },
+                    { "id": "kpi_31", "name": { "es": "Garantizar viajes libres de incidentes de reserva", "en": "Ensure travel free of booking incidents" } },
+                    { "id": "kpi_32", "name": { "es": "Gestión oportuna de los vouchers de garantía", "en": "Timely management of guarantee vouchers" } },
+                    { "id": "kpi_33", "name": { "es": "Documentación pre-viaje completa y precisa dentro de 1 a 3 semanas", "en": "Complete and accurate pre-travel documentation within 1 to 3 weeks" } },
+                    { "id": "kpi_34", "name": { "es": "Tiempo de respuesta efectivo y oportuno", "en": "Effective and timely response time" } },
+                    { "id": "kpi_35", "name": { "es": "Gestión de cambios eficiente sin impacto para el cliente.", "en": "Efficient change management with no impact on the client" } },
+                    { "id": "kpi_36", "name": { "es": "Dentro de 24 horas posterior a la salidad del cliente", "en": "Within 24 hours after the client's departure" } },
+                    { "id": "kpi_37", "name": { "es": "Registro y comunicación de calificaciones y retroalimentación", "en": "Recording and communication of ratings and feedback" } },
+                    { "id": "kpi_38", "name": { "es": "Dentro de 72 horas posterior a la salidad del cliente", "en": "Within 72 hours after the client's departure" } },
+                    { "id": "kpi_39", "name": { "es": "Garantizar la correcta aplicabilidad futura de las notas de crédito", "en": "Ensure the correct future applicability of credit notes" } },
+                    { "id": "kpi_40", "name": { "es": "Dentro de 48 horas posterior a la salidad del cliente", "en": "Within 48 hours after the client's departure" } },
+                    { "id": "kpi_41", "name": { "es": "Gestión Oportuna de Recordatorios", "en": "Timely Management of Reminders" } },
+                    { "id": "kpi_42", "name": { "es": "Cumplimiento de Plazos de Pago", "en": "Compliance with Payment Deadlines" } },
+                    { "id": "kpi_43", "name": { "es": "Gestión Oportuna del registro", "en": "Timely Management of Registration" } },
+                    { "id": "kpi_44", "name": { "es": "Acciones de Mejora Identificadas", "en": "Identified Improvement Actions" } },
+                    { "id": "kpi_45", "name": { "es": "Dentro del plazo correspondiente", "en": "Within the corresponding deadline" } }
+                ],
+                "tools": [
+                    { "id": "tool_1", "name": { "es": "Monday", "en": "Monday" }, "link": "" },
+                    { "id": "tool_2", "name": { "es": "Outlook", "en": "Outlook" }, "link": "" },
+                    { "id": "tool_3", "name": { "es": "WhatsApp", "en": "WhatsApp" }, "link": "" },
+                    { "id": "tool_4", "name": { "es": "Teams", "en": "Teams" }, "link": "" },
+                    { "id": "tool_5", "name": { "es": "Manual", "en": "Manual" }, "link": "" },
+                    { "id": "tool_6", "name": { "es": "Toursys", "en": "Toursys" }, "link": "" },
+                    { "id": "tool_7", "name": { "es": "Control de Servicios Web", "en": "Web Services Control" }, "link": "" },
+                    { "id": "tool_8", "name": { "es": "Formularios de Apertura Proveedores", "en": "Supplier Opening Forms" }, "link": "" },
+                    { "id": "tool_9", "name": { "es": "Formulario de Apertura de Servicios", "en": "Service Opening Forms" }, "link": "" },
+                    { "id": "tool_10", "name": { "es": "Formularios de apertura", "en": "Opening Forms" }, "link": "" },
+                    { "id": "tool_11", "name": { "es": "Teléfono", "en": "Phone" }, "link": "" },
+                    { "id": "tool_12", "name": { "es": "Sitios Web", "en": "Websites" }, "link": "" },
+                    { "id": "tool_13", "name": { "es": "Safari Portal", "en": "Safari Portal" }, "link": "" },
+                    { "id": "tool_14", "name": { "es": "Herramienta de Comisiones", "en": "Commission Tool" }, "link": "" },
+                    { "id": "tool_15", "name": { "es": "Herramienta de Comiciones", "en": "Commission Tool" }, "link": "" },
+                    { "id": "tool_16", "name": { "es": "Formulario de Apertura de Clientes", "en": "Client Opening Form" }, "link": "" },
+                    { "id": "tool_17", "name": { "es": "Formulario de solicitud de Pagos", "en": "Payment Request Form" }, "link": "" },
+                    { "id": "tool_18", "name": { "es": "Link de Pagos", "en": "Payment Link" }, "link": "" },
+                    { "id": "tool_19", "name": { "es": "Torusys", "en": "Toursys" }, "link": "" },
+                    { "id": "tool_20", "name": { "es": "Calendario de Outlook", "en": "Outlook Calendar" }, "link": "" },
+                    { "id": "tool_21", "name": { "es": "Cuestionario de Evaluación del Servicio", "en": "Service Evaluation Questionnaire" }, "link": "" },
+                    { "id": "tool_22", "name": { "es": "Formulario de Solicitud de Pagos", "en": "Payment Request Form" }, "link": "" }
+                ]
+            },
+            "phases": [
+                { "id": 1, "name": { "es": "Fase de Ventas", "en": "Sales Phase" }, "order": 1 },
+                { "id": 2, "name": { "es": "Fase de Reservación", "en": "Reservation Phase" }, "order": 2 },
+                { "id": 3, "name": { "es": "Fase de Operaciones", "en": "Operations Phase" }, "order": 3 },
+                { "id": 4, "name": { "es": "Fase Post-Venta", "en": "Post-Sale Phase" }, "order": 4 }
+            ],
+            "steps": [
+                {
+                    "id": 1, "phaseId": 1, "order": 1, 
+                    "title": { "es": "Calificar y Preparar el Lead Entrante para Asignación", "en": "Qualify and Prepare Incoming Lead for Assignment" }, 
+                    "roleId": "role_1", "kpiId": "kpi_1", "toolIds": ["tool_1"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 101, "title": { "es": "Recibir la notificación de un nuevo lead", "en": "Receive notification of a new lead" }, "roleId": "role_1", "kpiId": "kpi_1", "toolIds": ["tool_1"], "hasImages": false, "images": [] },
+                        { "id": 102, "title": { "es": "Verificar que el lead se ha registrado correctamente y está visible en el panel de Monday.", "en": "Verify the lead is correctly registered and visible on the Monday dashboard" }, "roleId": "role_1", "kpiId": "kpi_1", "toolIds": ["tool_1"], "hasImages": false, "images": [] },
+                        { "id": 103, "title": { "es": "Analizar la calidad del lead y asignarle una puntuación de 1 a 5", "en": "Analyze lead quality and assign a score from 1 to 5" }, "roleId": "role_1", "kpiId": "kpi_1", "toolIds": ["tool_1"], "hasImages": false, "images": [] },
+                        { "id": 104, "title": { "es": "Preparar y llenar los datos necesarios para dejar el lead listo para la asignación al Diseñador Líder.", "en": "Prepare and fill in the necessary data to get the lead ready for assignment to the Lead Designer" }, "roleId": "role_1", "kpiId": "kpi_1", "toolIds": ["tool_1"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 2, "phaseId": 1, "order": 2, 
+                    "title": { "es": "Asignar Estratégicamente el Lead a un Diseñador Líder", "en": "Strategically Assign the Lead to a Lead Designer" }, 
+                    "roleId": "role_1", "kpiId": "kpi_2", "toolIds": ["tool_1"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 201, "title": { "es": "Revisar la disponibilidad y la cantidad de proyectos activos de cada Diseñador Líder.", "en": "Review the availability and active project load of each Lead Designer" }, "roleId": "role_1", "kpiId": "kpi_2", "toolIds": ["tool_1"], "hasImages": false, "images": [] },
+                        { "id": 202, "title": { "es": "Comparar las necesidades específicas del nuevo lead con la especialización y experiencia de los diseñadores disponibles.", "en": "Match the specific needs of the new lead with the specialization and experience of available designers" }, "roleId": "role_1", "kpiId": "kpi_2", "toolIds": ["tool_1"], "hasImages": false, "images": [] },
+                        { "id": 203, "title": { "es": "Realizar la asignación del lead en Monday al diseñador más idóneo, notificándole la nueva tarea.", "en": "Assign the lead in Monday.com to the most suitable designer, notifying them of the new task" }, "roleId": "role_1", "kpiId": "kpi_2", "toolIds": ["tool_1"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 3, "phaseId": 1, "order": 3, 
+                    "title": { "es": "Estructurar el Perfil del Lead en Monday para Seguimiento", "en": "Structure the Lead's Profile in Monday.com for Tracking" }, 
+                    "roleId": "role_2", "kpiId": "kpi_3", "toolIds": ["tool_1"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 301, "title": { "es": "Recibir la asignación del lead a través de Monday.", "en": "Receive the lead assignment via Monday" }, "roleId": "role_2", "kpiId": "kpi_3", "toolIds": ["tool_1"], "hasImages": false, "images": [] },
+                        { "id": 302, "title": { "es": "Asignar los parámetros necesarios en Monday para gestionar los futuros estados del lead.", "en": "Set the necessary parameters in Monday to manage future lead statuses" }, "roleId": "role_2", "kpiId": "kpi_3", "toolIds": ["tool_1"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 4, "phaseId": 1, "order": 4, 
+                    "title": { "es": "Realizar el Primer Contacto con el Agente para Recopilar Información", "en": "Make First Contact with the Agent to Gather Information" }, 
+                    "roleId": "role_2", "kpiId": "kpi_4", "toolIds": ["tool_1", "tool_2"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 401, "title": { "es": "Enviar un primer correo de contacto al agente.", "en": "Send an initial contact email to the agent" }, "roleId": "role_2", "kpiId": "kpi_4", "toolIds": ["tool_1", "tool_2"], "hasImages": false, "images": [] },
+                        { "id": 402, "title": { "es": "Obtener información valiosa para el diseño de la primera propuesta.", "en": "Obtain valuable information for designing the first proposal" }, "roleId": "role_2", "kpiId": "kpi_4", "toolIds": ["tool_1", "tool_2"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 5, "phaseId": 1, "order": 5, 
+                    "title": { "es": "Mantener Reunión con el Agente para Profundizar en sus Necesidades", "en": "Hold a Meeting with the Agent to Delve into Their Needs" }, 
+                    "roleId": "role_2", "kpiId": "kpi_5", "toolIds": ["tool_3", "tool_4"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 501, "title": { "es": "Entablar una llamada o videollamada con el cliente.", "en": "Conduct a call or video call with the client" }, "roleId": "role_2", "kpiId": "kpi_5", "toolIds": ["tool_3", "tool_4"], "hasImages": false, "images": [] },
+                        { "id": 502, "title": { "es": "Comprender a fondo las necesidades del cliente para diseñar una propuesta a la medida.", "en": "Thoroughly understand the client's needs to design a tailored proposal" }, "roleId": "role_2", "kpiId": "kpi_5", "toolIds": ["tool_3", "tool_4"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 6, "phaseId": 1, "order": 6, 
+                    "title": { "es": "Confeccionar un Boceto del Itinerario Enfocado en Hospedajes", "en": "Create an Itinerary Draft Focused on Accommodations" }, 
+                    "roleId": "role_2", "kpiId": "kpi_6", "toolIds": ["tool_5", "tool_2"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 601, "title": { "es": "Elaborar un boceto del itinerario, centrándose principalmente en los hospedajes.", "en": "Develop an itinerary draft, focusing primarily on accommodations" }, "roleId": "role_2", "kpiId": "kpi_6", "toolIds": ["tool_5", "tool_2"], "hasImages": false, "images": [] },
+                        { "id": 602, "title": { "es": "Enviar el boceto a Reservas para que corroboren la disponibilidad y se pueda realizar una propuesta apropiada.", "en": "Send the draft to the Bookings department to confirm availability for a suitable proposal" }, "roleId": "role_2", "kpiId": "kpi_6", "toolIds": ["tool_5", "tool_2"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 7, "phaseId": 1, "order": 7, 
+                    "title": { "es": "Verificar y Solicitar la Inclusión de Servicios en Toursys", "en": "Verify and Request the Inclusion of Services in Toursys" }, 
+                    "roleId": "role_2", "kpiId": "kpi_7", "toolIds": ["tool_6", "tool_7", "tool_8", "tool_9"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 701, "title": { "es": "Corroborar en Toursys o en el Control de Servicios Web si el producto necesario para el boceto está ingresado.", "en": "Check in Toursys or the Web Services Control if the product needed for the draft is registered" }, "roleId": "role_2", "kpiId": "kpi_7", "toolIds": ["tool_6", "tool_7", "tool_8", "tool_9"], "hasImages": false, "images": [] },
+                        { "id": 702, "title": { "es": "Identificar los servicios o proveedores faltantes.", "en": "Identify missing services or suppliers" }, "roleId": "role_2", "kpiId": "kpi_7", "toolIds": ["tool_6", "tool_7", "tool_8", "tool_9"], "hasImages": false, "images": [] },
+                        { "id": 703, "title": { "es": "Llenar y enviar el ticket de solicitud de ingreso a Producto y Sistemas mediante los formularios de apertura.", "en": "Fill out and send the inclusion request ticket to the Product and Systems department via the opening forms" }, "roleId": "role_2", "kpiId": "kpi_7", "toolIds": ["tool_6", "tool_7", "tool_8", "tool_9"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 8, "phaseId": 1, "order": 8, 
+                    "title": { "es": "Gestionar el Ingreso de Nuevos Proveedores y Servicios al Sistema", "en": "Manage the Entry of New Suppliers and Services into the System" }, 
+                    "roleId": "role_3", "kpiId": "kpi_8", "toolIds": ["tool_6", "tool_7", "tool_10"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 801, "title": { "es": "Recibir las solicitudes de ingreso.", "en": "Receive inclusion requests" }, "roleId": "role_3", "kpiId": "kpi_8", "toolIds": ["tool_6", "tool_7", "tool_10"], "hasImages": false, "images": [] },
+                        { "id": 802, "title": { "es": "Determinar si el ingreso puede proceder, en caso de que no proceda debe comunicarlo", "en": "Determine if the entry can proceed; if not, communicate this" }, "roleId": "role_3", "kpiId": "kpi_8", "toolIds": ["tool_6", "tool_7", "tool_10"], "hasImages": false, "images": [] },
+                        { "id": 803, "title": { "es": "En caso de información faltante, buscarla.", "en": "If information is missing, search for it" }, "roleId": "role_3", "kpiId": "kpi_8", "toolIds": ["tool_6", "tool_7", "tool_10"], "hasImages": false, "images": [] },
+                        { "id": 804, "title": { "es": "Realizar los ingresos correspondientes en el sistema.", "en": "Perform the corresponding entries in the system" }, "roleId": "role_3", "kpiId": "kpi_8", "toolIds": ["tool_6", "tool_7", "tool_10"], "hasImages": false, "images": [] },
+                        { "id": 805, "title": { "es": "Notificar por correo al Diseñador Líder que los ingresos están realizados.", "en": "Notify the Lead Designer by email that the entries are complete" }, "roleId": "role_3", "kpiId": "kpi_8", "toolIds": ["tool_6", "tool_7", "tool_10"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 9, "phaseId": 1, "order": 9, 
+                    "title": { "es": "Solicitar la Verificación de Disponibilidad de Servicios a Reservas", "en": "Request Service Availability Verification from Bookings" }, 
+                    "roleId": "role_2", "kpiId": "kpi_9", "toolIds": ["tool_2"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 901, "title": { "es": "Enviar un correo a Reservas solicitando la búsqueda y verificación de disponibilidad de los servicios del boceto.", "en": "Send an email to the Bookings department requesting they search for and verify the availability of the services in the draft" }, "roleId": "role_2", "kpiId": "kpi_9", "toolIds": ["tool_2"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 10, "phaseId": 1, "order": 10, 
+                    "title": { "es": "Verificar y Comunicar la Disponibilidad de Servicios", "en": "Verify and Communicate Service Availability" }, 
+                    "roleId": "role_4", "kpiId": "kpi_10", "toolIds": ["tool_2", "tool_11", "tool_3", "tool_12"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 1001, "title": { "es": "Realizar la búsqueda y verificación de disponibilidad a través de correo, mensajes, llamadas o sitios web de proveedores.", "en": "Search for and verify availability via email, messages, calls, or supplier websites" }, "roleId": "role_4", "kpiId": "kpi_10", "toolIds": ["tool_2", "tool_11", "tool_3", "tool_12"], "hasImages": false, "images": [] },
+                        { "id": 1002, "title": { "es": "Enviar el detalle de la disponibilidad al Diseñador Líder por correo.", "en": "Email the availability details to the Lead Designer" }, "roleId": "role_4", "kpiId": "kpi_10", "toolIds": ["tool_2", "tool_11", "tool_3", "tool_12"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 11, "phaseId": 1, "order": 11, 
+                    "title": { "es": "Construir la Propuesta Inicial de Cotización en Toursys", "en": "Build the Initial Quote Proposal in Toursys" }, 
+                    "roleId": "role_2", "kpiId": "kpi_11", "toolIds": ["tool_6"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 1101, "title": { "es": "Construir la cotización inicial tomando en cuenta la disponibilidad informada por Reservas y los detalles del cliente.", "en": "Build the initial quote considering the availability reported by Bookings and client details" }, "roleId": "role_2", "kpiId": "kpi_11", "toolIds": ["tool_6"], "hasImages": false, "images": [] },
+                        { "id": 1102, "title": { "es": "Si el cliente existe, cotizarle directamente.", "en": "If the client exists, quote them directly" }, "roleId": "role_2", "kpiId": "kpi_11", "toolIds": ["tool_6"], "hasImages": false, "images": [] },
+                        { "id": 1103, "title": { "es": "Si el cliente no existe, usar el cliente genérico correspondiente a su tipo para realizar la primera cotización.", "en": "If the client does not exist, use the corresponding generic client type for the first quote" }, "roleId": "role_2", "kpiId": "kpi_11", "toolIds": ["tool_6"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 12, "phaseId": 1, "order": 12, 
+                    "title": { "es": "Diseñar el Itinerario Visual en Safari Portal", "en": "Design the Visual Itinerary in Safari Portal" }, 
+                    "roleId": "role_2", "kpiId": "kpi_12", "toolIds": ["tool_13"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 1201, "title": { "es": "Construir en Safari Portal el itinerario gráfico correspondiente a la cotización desarrollada en Toursys.", "en": "Build the graphic itinerary in Safari Portal corresponding to the quote developed in Toursys" }, "roleId": "role_2", "kpiId": "kpi_12", "toolIds": ["tool_13"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 13, "phaseId": 1, "order": 13, 
+                    "title": { "es": "Enviar la Propuesta de Cotización al Cliente/Agente", "en": "Send the Quote Proposal to the Client/Agent" }, 
+                    "roleId": "role_2", "kpiId": "kpi_13", "toolIds": ["tool_1", "tool_6", "tool_14", "tool_13"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 1301, "title": { "es": "Descargar la cotización del sistema y procesarla en la Herramienta de Comisiones.", "en": "Download the quote from the system and process it in the Commission Tool" }, "roleId": "role_2", "kpiId": "kpi_13", "toolIds": ["tool_1", "tool_6", "tool_14", "tool_13"], "hasImages": false, "images": [] },
+                        { "id": 1302, "title": { "es": "Generar el correo con la propuesta de cotización, seleccionando la configuración adecuada.", "en": "Generate the email with the quote proposal, selecting the appropriate settings" }, "roleId": "role_2", "kpiId": "kpi_13", "toolIds": ["tool_1", "tool_6", "tool_14", "tool_13"], "hasImages": false, "images": [] },
+                        { "id": 1303, "title": { "es": "Incluir en el correo el link del itinerario de Safari Portal.", "en": "Include the Safari Portal itinerary link in the email" }, "roleId": "role_2", "kpiId": "kpi_13", "toolIds": ["tool_1", "tool_6", "tool_14", "tool_13"], "hasImages": false, "images": [] },
+                        { "id": 1304, "title": { "es": "Enviar todo por correo al cliente/Agente.", "en": "Send everything by email to the client/agent" }, "roleId": "role_2", "kpiId": "kpi_13", "toolIds": ["tool_1", "tool_6", "tool_14", "tool_13"], "hasImages": false, "images": [] },
+                        { "id": 1305, "title": { "es": "Actualizar el estatus en Monday.", "en": "Update the status in Monday" }, "roleId": "role_2", "kpiId": "kpi_13", "toolIds": ["tool_1", "tool_6", "tool_14", "tool_13"], "hasImages": false, "images": [] },
+                        { "id": 1306, "title": { "es": "Incluir el ID de la cotización de Toursys en el lead de Monday para enlazar ambos registros.", "en": "Add the Toursys quote ID to the Monday lead to link both records" }, "roleId": "role_2", "kpiId": "kpi_13", "toolIds": ["tool_1", "tool_6", "tool_14", "tool_13"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 14, "phaseId": 1, "order": 14, 
+                    "title": { "es": "Realizar Seguimiento de la Propuesta con el Cliente/Agente", "en": "Follow Up on the Proposal with the Client/Agent" }, 
+                    "roleId": "role_2", "kpiId": "kpi_14", "toolIds": ["tool_1", "tool_2", "tool_3", "tool_11", "tool_4"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 1401, "title": { "es": "Realizar los seguimientos oportunos para lograr la aprobación del cliente/agente.", "en": "Perform timely follow-ups to get the client/agent's approval" }, "roleId": "role_2", "kpiId": "kpi_14", "toolIds": ["tool_1", "tool_2", "tool_3", "tool_11", "tool_4"], "hasImages": false, "images": [] },
+                        { "id": 1402, "title": { "es": "Obtener feedback para ajustar la primera propuesta de cotización enviada.", "en": "Obtain feedback to adjust the first quote proposal sent" }, "roleId": "role_2", "kpiId": "kpi_14", "toolIds": ["tool_1", "tool_2", "tool_3", "tool_11", "tool_4"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 15, "phaseId": 1, "order": 15, 
+                    "title": { "es": "Gestionar Cambios y Modificaciones en la Propuesta de Cotización", "en": "Manage Changes and Modifications to the Quote Proposal" }, 
+                    "roleId": "role_2", "kpiId": "kpi_15", "toolIds": ["tool_1", "tool_6", "tool_15", "tool_13"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 1501, "title": { "es": "Recibir y analizar la solicitud de cambios o ajustes enviada por el cliente/agente.", "en": "Receive and analyze the change or adjustment request from the client/agent" }, "roleId": "role_2", "kpiId": "kpi_15", "toolIds": ["tool_1", "tool_6", "tool_15", "tool_13"], "hasImages": false, "images": [] },
+                        { "id": 1502, "title": { "es": "Validar los ajustes con el cliente/agente mediante una llamada, solo si es necesario aclarar detalles.", "en": "Validate adjustments with the client/agent via a call, only if details need clarification" }, "roleId": "role_2", "kpiId": "kpi_15", "toolIds": ["tool_1", "tool_6", "tool_15", "tool_13"], "hasImages": false, "images": [] },
+                        { "id": 1503, "title": { "es": "Realizar los ajustes solicitados por el cliente/agente en Toursys y Safari Portal.", "en": "Make the requested adjustments in Toursys and Safari Portal" }, "roleId": "role_2", "kpiId": "kpi_15", "toolIds": ["tool_1", "tool_6", "tool_15", "tool_13"], "hasImages": false, "images": [] },
+                        { "id": 1504, "title": { "es": "Generar y enviar la propuesta de cotización actualizada al cliente/agente, repitiendo el proceso de envío a través de la Herramienta de Comisiones.", "en": "Generate and send the updated quote proposal to the client/agent, repeating the sending process through the Commission Tool" }, "roleId": "role_2", "kpiId": "kpi_15", "toolIds": ["tool_1", "tool_6", "tool_15", "tool_13"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 16, "phaseId": 1, "order": 16, 
+                    "title": { "es": "Enviar Propuesta de Cotización Actualizada al Cliente/Agente", "en": "Send Updated Quote Proposal to the Client/Agent" }, 
+                    "roleId": "role_2", "kpiId": "kpi_16", "toolIds": ["tool_1", "tool_6", "tool_15", "tool_13"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 1601, "title": { "es": "Proceder con el envío de la nueva propuesta de cotización.", "en": "Proceed with sending the new quote proposal" }, "roleId": "role_2", "kpiId": "kpi_16", "toolIds": ["tool_1", "tool_6", "tool_15", "tool_13"], "hasImages": false, "images": [] },
+                        { "id": 1602, "title": { "es": "Incluir el nuevo itinerario gráfico creado en Safari Portal.", "en": "Include the new graphic itinerary created in Safari Portal" }, "roleId": "role_2", "kpiId": "kpi_16", "toolIds": ["tool_1", "tool_6", "tool_15", "tool_13"], "hasImages": false, "images": [] },
+                        { "id": 1603, "title": { "es": "Utilizar la Herramienta de Comisiones para generar la tabla de cotización o el precio total de la nueva propuesta de cotización y enviarla.", "en": "Use the Commission Tool to generate the quote table or total price for the new proposal and send it" }, "roleId": "role_2", "kpiId": "kpi_16", "toolIds": ["tool_1", "tool_6", "tool_15", "tool_13"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 17, "phaseId": 1, "order": 17, 
+                    "title": { "es": "Actualizar el Estado del Lead en Monday", "en": "Update the Lead Status in Monday.com" }, 
+                    "roleId": "role_2", "kpiId": "kpi_17", "toolIds": ["tool_1"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 1701, "title": { "es": "Después de enviar una nueva propuesta de cotización, ajustar el estado del lead en Monday.", "en": "After sending a new quote proposal, adjust the lead status in Monday" }, "roleId": "role_2", "kpiId": "kpi_17", "toolIds": ["tool_1"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 18, "phaseId": 1, "order": 18, 
+                    "title": { "es": "Realizar el Seguimiento a la Sropuesta Sctualizada y Sestionar la Respuesta del Cliente/Agente.", "en": "Follow Up on the Updated Proposal and Manage the Client/Agent's Response" }, 
+                    "roleId": "role_2", "kpiId": "kpi_18", "toolIds": ["tool_1", "tool_2", "tool_11", "tool_3"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 1801, "title": { "es": "Dar seguimiento con el cliente/agente sobre la última versión de la propuesta de cotización enviada.", "en": "Follow up with the client/agent on the latest version of the quote proposal" }, "roleId": "role_2", "kpiId": "kpi_18", "toolIds": ["tool_1", "tool_2", "tool_11", "tool_3"], "hasImages": false, "images": [] },
+                        { "id": 1802, "title": { "es": "Recibir el feedback final del cliente/agente y determinar el resultado: a) Si el cliente/agente aprueba la propuesta de cotización: Proceder al paso de \"Gestionar la Confirmación y Apertura\" (Paso 18). b) Si el cliente/agente solicita nuevos ajustes: Regresar al paso de \"Gestionar Cambios y Modificaciones en la Propuesta de Cotización\" (Paso 15) para iniciar un nuevo ciclo de revisión.", "en": "Receive final feedback and determine the outcome:\na) If approved: Proceed to \"Manage Confirmation and Opening\" (Step 19).\nb) If new adjustments are requested: Return to \"Manage Changes and Modifications\" (Step 15)" }, "roleId": "role_2", "kpiId": "kpi_18", "toolIds": ["tool_1", "tool_2", "tool_11", "tool_3"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 19, "phaseId": 1, "order": 19, 
+                    "title": { "es": "Gestionar la Confirmación y Apertura del Cliente/Agente en en Toursys", "en": "Manage Confirmation and Opening of the Client/Agent in Toursys" }, 
+                    "roleId": "role_2", "kpiId": "kpi_19", "toolIds": ["tool_1", "tool_2", "tool_16"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 1901, "title": { "es": "Ante la confirmación del cliente/agente, solicitar la información necesaria para el registro en Toursys.", "en": "Upon confirmation, request the necessary information for registration in Toursys" }, "roleId": "role_2", "kpiId": "kpi_19", "toolIds": ["tool_1", "tool_2", "tool_16"], "hasImages": false, "images": [] },
+                        { "id": 1902, "title": { "es": "Llenar y enviar el Formulario de Apertura de Clientes a Producto y Sistemas para su ingreso.", "en": "Fill out and send the Client Opening Form to Product and Systems for their entry" }, "roleId": "role_2", "kpiId": "kpi_19", "toolIds": ["tool_1", "tool_2", "tool_16"], "hasImages": false, "images": [] },
+                        { "id": 1903, "title": { "es": "Si hay más ajustes, repetir el proceso de modificación y envío.", "en": "If there are more adjustments, repeat the modification and sending process" }, "roleId": "role_2", "kpiId": "kpi_19", "toolIds": ["tool_1", "tool_2", "tool_16"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 20, "phaseId": 2, "order": 1, 
+                    "title": { "es": "Registrar el Nuevo Cliente/Agente en Toursys", "en": "Register the New Client/Agent in Toursys" }, 
+                    "roleId": "role_3", "kpiId": "kpi_20", "toolIds": ["tool_6", "tool_10", "tool_2"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 2001, "title": { "es": "Recibir la solicitud de apertura de cliente/agente.", "en": "Receive the client/agent opening request" }, "roleId": "role_3", "kpiId": "kpi_20", "toolIds": ["tool_6", "tool_10", "tool_2"], "hasImages": false, "images": [] },
+                        { "id": 2002, "title": { "es": "Proceder con el ingreso del cliente en Toursys.", "en": "Proceed with entering the client into Toursys" }, "roleId": "role_3", "kpiId": "kpi_20", "toolIds": ["tool_6", "tool_10", "tool_2"], "hasImages": false, "images": [] },
+                        { "id": 2003, "title": { "es": "Notificar por correo al Diseñador Líder que el ingreso está realizado.", "en": "Notify the Lead Designer by email that the entry is complete" }, "roleId": "role_3", "kpiId": "kpi_20", "toolIds": ["tool_6", "tool_10", "tool_2"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 21, "phaseId": 2, "order": 2, 
+                    "title": { "es": "Solicitar la Reservación de Servicios", "en": "Request Service Bookings" }, 
+                    "roleId": "role_2", "kpiId": "kpi_21", "toolIds": ["tool_6", "tool_2"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 2101, "title": { "es": "Mover la cotización del módulo de \"Cotización\" al módulo de \"Reservas\" en Toursys.", "en": "Move the quote from the \"Quotation\" module to the \"Bookings\" module in Toursys" }, "roleId": "role_2", "kpiId": "kpi_21", "toolIds": ["tool_6", "tool_2"], "hasImages": false, "images": [] },
+                        { "id": 2102, "title": { "es": "Enviar un correo a Reservas con el ID de la cotización, indicando que pueden proceder con la reservación de los servicios.", "en": "Send an email to Bookings with the quote ID, indicating they can proceed with booking the services" }, "roleId": "role_2", "kpiId": "kpi_21", "toolIds": ["tool_6", "tool_2"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 22, "phaseId": 2, "order": 3, 
+                    "title": { "es": "Ejecutar y Confirmar las Reservas de Servicios", "en": "Execute and Confirm Service Bookings" }, 
+                    "roleId": "role_5", "kpiId": "kpi_22", "toolIds": ["tool_6", "tool_2"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 2201, "title": { "es": "Recibir el correo de solicitud y buscar la propuesta de cotización en el módulo de reservas con el ID proporcionado.", "en": "Receive the request email and find the quote proposal in the bookings module with the provided ID" }, "roleId": "role_5", "kpiId": "kpi_22", "toolIds": ["tool_6", "tool_2"], "hasImages": false, "images": [] },
+                        { "id": 2202, "title": { "es": "Enviar las solicitudes de reserva desde el sistema Toursys.", "en": "Send booking requests from the Toursys system" }, "roleId": "role_5", "kpiId": "kpi_22", "toolIds": ["tool_6", "tool_2"], "hasImages": false, "images": [] },
+                        { "id": 2203, "title": { "es": "Al recibir confirmación por parte del proveedor, registrar el número de confirmación de cada servicio en Toursys.", "en": "Upon receiving confirmation from the supplier, register the confirmation number for each service in Toursys" }, "roleId": "role_5", "kpiId": "kpi_22", "toolIds": ["tool_6", "tool_2"], "hasImages": false, "images": [] },
+                        { "id": 2204, "title": { "es": "Cargar un documento de respaldo de la confirmación de la reserva.", "en": "Upload a supporting document for the booking confirmation" }, "roleId": "role_5", "kpiId": "kpi_22", "toolIds": ["tool_6", "tool_2"], "hasImages": false, "images": [] },
+                        { "id": 2205, "title": { "es": "Informar por correo al Diseñador Líder cuando todos los servicios estén reservados.", "en": "Inform the Lead Designer by email when all services are booked" }, "roleId": "role_5", "kpiId": "kpi_22", "toolIds": ["tool_6", "tool_2"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 23, "phaseId": 2, "order": 4, 
+                    "title": { "es": "Gestionar la Solicitud de Prepagos a Proveedores", "en": "Manage Prepayment Requests to Suppliers" }, 
+                    "roleId": "role_5", "kpiId": "kpi_23", "toolIds": ["tool_6", "tool_17"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 2301, "title": { "es": "Opción A (Automática): Contabilidad recibe una alerta del sistema sobre pagos pendientes y procede a gestionarlos.", "en": "Option A (Automatic): Accounting receives a system alert about pending payments and proceeds to manage them" }, "roleId": "role_5", "kpiId": "kpi_23", "toolIds": ["tool_6", "tool_17"], "hasImages": false, "images": [] },
+                        { "id": 2302, "title": { "es": "Opción B (Manual): Llenar y enviar el formulario de solicitud de pago a Contabilidad con el detalle para que gestionen los pagos.", "en": "Option B (Manual): Fill out and send the payment request form to Accounting with details for them to manage payments" }, "roleId": "role_5", "kpiId": "kpi_23", "toolIds": ["tool_6", "tool_17"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 24, "phaseId": 2, "order": 5, 
+                    "title": { "es": "Procesar y Registrar los Pagos a Proveedores", "en": "Process and Record Payments to Suppliers" }, 
+                    "roleId": "role_6", "kpiId": "kpi_24", "toolIds": ["tool_6", "tool_17"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 2401, "title": { "es": "Opción A (Automática): Recibir la alerta diaria y realizar los pagos pendientes, agregando la transacción en Toursys.", "en": "Option A (Automatic): Receive the daily alert and make pending payments, adding the transaction in Toursys" }, "roleId": "role_6", "kpiId": "kpi_24", "toolIds": ["tool_6", "tool_17"], "hasImages": false, "images": [] },
+                        { "id": 2402, "title": { "es": "Opción B (Manual): Recibir el formulario de solicitud, procesar el pago y registrar la transacción en Toursys.", "en": "Option B (Manual): Receive the request form, process the payment, and record the transaction in Toursys" }, "roleId": "role_6", "kpiId": "kpi_24", "toolIds": ["tool_6", "tool_17"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 25, "phaseId": 2, "order": 6, 
+                    "title": { "es": "Enviar Factura Proforma y Enlace de Pago al Agente", "en": "Send Proforma Invoice and Payment Link to the Agent" }, 
+                    "roleId": "role_2", "kpiId": "kpi_25", "toolIds": ["tool_1", "tool_6", "tool_15", "tool_2", "tool_18"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 2501, "title": { "es": "Una vez todo esté reservado, generar la factura proforma con la Herramienta de Comisiones.", "en": "Once everything is booked, generate the proforma invoice with the Commission Tool" }, "roleId": "role_2", "kpiId": "kpi_25", "toolIds": ["tool_1", "tool_6", "tool_15", "tool_2", "tool_18"], "hasImages": false, "images": [] },
+                        { "id": 2502, "title": { "es": "Enviar al agente la factura proforma y el enlace de pago para que el cliente gestione el anticipo o pago total.", "en": "Send the agent the proforma invoice and payment link for the client to manage the deposit or full payment" }, "roleId": "role_2", "kpiId": "kpi_25", "toolIds": ["tool_1", "tool_6", "tool_15", "tool_2", "tool_18"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 26, "phaseId": 2, "order": 7, 
+                    "title": { "es": "Actualizar el Estado del Lead a \"Ganado\"", "en": "Update Lead Status to \"Won\"" }, 
+                    "roleId": "role_2", "kpiId": "kpi_17", "toolIds": ["tool_1"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 2601, "title": { "es": "Cuando el cliente/agente confirma y se inicia la gestión del pago, actualizar el estado del lead en Monday a \"Ganado\".", "en": "When the client/agent confirms and payment management begins, update the lead status in Monday.com to \"Won\"" }, "roleId": "role_2", "kpiId": "kpi_17", "toolIds": ["tool_1"], "hasImages": false, "images": [] },
+                        { "id": 2602, "title": { "es": "A su vez debe ingresar en Monday el importe total confirmado del lead para temas estadísticos junto a la factura proforma.", "en": "Simultaneously, enter the total confirmed amount of the lead in Monday.com for statistical purposes, along with the proforma invoice" }, "roleId": "role_2", "kpiId": "kpi_17", "toolIds": ["tool_1"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 27, "phaseId": 2, "order": 8, 
+                    "title": { "es": "Archivar la Documentación del Cliente/Agente en Toursys", "en": "Archive Client/Agent Documentation in Toursys" }, 
+                    "roleId": "role_2", "kpiId": "kpi_26", "toolIds": ["tool_19"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 2701, "title": { "es": "Solicitar al cliente/agente toda la documentación relevante (pasaportes, cédulas, etc.).", "en": "Request all relevant documentation from the client/agent (passports, IDs, etc.)" }, "roleId": "role_2", "kpiId": "kpi_26", "toolIds": ["tool_19"], "hasImages": false, "images": [] },
+                        { "id": 2702, "title": { "es": "Ingresar y guardar los documentos en el apartado de \"Archivo\" de la propuesta de cotización correspondiente en Toursys.", "en": "Enter and save the documents in the \"Archive\" section of the corresponding quote proposal in Toursys" }, "roleId": "role_2", "kpiId": "kpi_26", "toolIds": ["tool_19"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 28, "phaseId": 2, "order": 9, 
+                    "title": { "es": "Enviar al Cliente/Agente la Propuesta Final de Cotización con Detalles Adicionales", "en": "Send the Client/Agent the Final Quote Proposal with Additional Details" }, 
+                    "roleId": "role_2", "kpiId": "kpi_27", "toolIds": ["tool_1", "tool_13"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 2801, "title": { "es": "Una vez todo esté reservado, enviar al cliente/agente un correo con la propuesta final de cotización y actualizada.", "en": "Once everything is booked, send the client/agent an email with the final, updated quote proposal" }, "roleId": "role_2", "kpiId": "kpi_27", "toolIds": ["tool_1", "tool_13"], "hasImages": false, "images": [] },
+                        { "id": 2802, "title": { "es": "Incluir todos los detalles adicionales que el cliente/agente debe tener en cuenta antes de su viaje (ej. lista de empaque, guías de propinas, horarios de recogida, vuelos).", "en": "Include all additional details the client/agent should be aware of before their trip (e.g., packing list, tipping guides, pickup times, flights)" }, "roleId": "role_2", "kpiId": "kpi_27", "toolIds": ["tool_1", "tool_13"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 29, "phaseId": 2, "order": 10, 
+                    "title": { "es": "Confirmar y Registrar la Recepción de Pagos de Clientes/Agente", "en": "Confirm and Record Receipt of Client/Agent Payments" }, 
+                    "roleId": "role_6", "kpiId": "kpi_28", "toolIds": ["tool_6", "tool_2"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 2901, "title": { "es": "Estar alerta a la recepción de pagos.", "en": "Be alert to the receipt of payments" }, "roleId": "role_6", "kpiId": "kpi_28", "toolIds": ["tool_6", "tool_2"], "hasImages": false, "images": [] },
+                        { "id": 2902, "title": { "es": "Al recibir un pago, consultar por correo al Diseñador Líder o Asistente Administrativo a qué cliente/agente se asocia.", "en": "Upon receiving a payment, ask the Lead Designer or Administrative Assistant by email which client/agent it is associated with" }, "roleId": "role_6", "kpiId": "kpi_28", "toolIds": ["tool_6", "tool_2"], "hasImages": false, "images": [] },
+                        { "id": 2903, "title": { "es": "Realizar la transacción correspondiente en Toursys para ligar el pago al cliente/agente, dejándolo disponible para la facturación.", "en": "Make the corresponding transaction in Toursys to link the payment to the client/agent, making it available for invoicing" }, "roleId": "role_6", "kpiId": "kpi_28", "toolIds": ["tool_6", "tool_2"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 30, "phaseId": 2, "order": 11, 
+                    "title": { "es": "Agendar y Comunicar Fechas de Pagos Futuros", "en": "Schedule and Communicate Future Payment Dates" }, 
+                    "roleId": "role_2", "kpiId": "kpi_29", "toolIds": ["tool_1", "tool_19", "tool_20"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 3001, "title": { "es": "Establecer las fechas de los futuros pagos.", "en": "Set the dates for future payments" }, "roleId": "role_2", "kpiId": "kpi_29", "toolIds": ["tool_1", "tool_19", "tool_20"], "hasImages": false, "images": [] },
+                        { "id": 3002, "title": { "es": "Agendarlas en el calendario.", "en": "Schedule them in the calendar" }, "roleId": "role_2", "kpiId": "kpi_29", "toolIds": ["tool_1", "tool_19", "tool_20"], "hasImages": false, "images": [] },
+                        { "id": 3003, "title": { "es": "Realizar recordatorios al cliente.", "en": "Send reminders to the client" }, "roleId": "role_2", "kpiId": "kpi_29", "toolIds": ["tool_1", "tool_19", "tool_20"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 31, "phaseId": 2, "order": 12, 
+                    "title": { "es": "Realizar el \"Cierre\" de la Propuesta Final para Facturación", "en": "\"Close\" the Final Proposal for Invoicing" }, 
+                    "roleId": "role_7", "kpiId": "kpi_30", "toolIds": ["tool_6"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 3101, "title": { "es": "Realizar una revisión integral de las tarifas en la propuesta final.", "en": "Perform a comprehensive review of the rates in the final proposal" }, "roleId": "role_7", "kpiId": "kpi_30", "toolIds": ["tool_6"], "hasImages": false, "images": [] },
+                        { "id": 3102, "title": { "es": "Corroborar las tarifas contra los documentos de confirmación cargados por Reservas.", "en": "Corroborate the rates against the confirmation documents uploaded by Bookings" }, "roleId": "role_7", "kpiId": "kpi_30", "toolIds": ["tool_6"], "hasImages": false, "images": [] },
+                        { "id": 3103, "title": { "es": "Realizar los ajustes necesarios para asegurar que la propuesta final esté lista para ser facturada.", "en": "Make necessary adjustments to ensure the final proposal is ready to be invoiced" }, "roleId": "role_7", "kpiId": "kpi_30", "toolIds": ["tool_6"], "hasImages": false, "images": [] },
+                        { "id": 3104, "title": { "es": "Agregar margen de utilidad en Monday según información de Toursys.", "en": "Add the profit margin in Monday.com based on Toursys information" }, "roleId": "role_7", "kpiId": "kpi_30", "toolIds": ["tool_6"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 32, "phaseId": 2, "order": 13, 
+                    "title": { "es": "Transferir y Discutir la Propuesta Final con Operaciones", "en": "Transfer and Discuss the Final Proposal with Operations" }, 
+                    "roleId": "role_2", "kpiId": "kpi_30", "toolIds": ["tool_2", "tool_4"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 3201, "title": { "es": "Transferir la propuesta final a Operaciones enviando un correo con el ID de Toursys.", "en": "Transfer the final proposal to Operations by sending an email with the Toursys ID" }, "roleId": "role_2", "kpiId": "kpi_30", "toolIds": ["tool_2", "tool_4"], "hasImages": false, "images": [] },
+                        { "id": 3202, "title": { "es": "Incluir en Toursys todas las notas importantes para que Operaciones las pueda visualizar.", "en": "Include all important notes in Toursys for Operations to view" }, "roleId": "role_2", "kpiId": "kpi_30", "toolIds": ["tool_2", "tool_4"], "hasImages": false, "images": [] },
+                        { "id": 3203, "title": { "es": "Mantener una reunión por Teams para discutir los aspectos importantes y relevantes de la propuesta final.", "en": "Hold a Teams meeting to discuss important and relevant aspects of the final proposal" }, "roleId": "role_2", "kpiId": "kpi_30", "toolIds": ["tool_2", "tool_4"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 33, "phaseId": 3, "order": 1, 
+                    "title": { "es": "Reconfirmar Detalles de Todos los Servicios reservados de la Propuesta Final", "en": "Reconfirm Details of All Booked Services from the Final Proposal" }, 
+                    "roleId": "role_8", "kpiId": "kpi_31", "toolIds": ["tool_6", "tool_2", "tool_11"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 3301, "title": { "es": "Al recibir el correo con el ID de la propuesta final, buscar la Propuesta correspondiente en Toursys.", "en": "Upon receiving the email with the final proposal ID, find the corresponding Proposal in Toursys" }, "roleId": "role_8", "kpiId": "kpi_31", "toolIds": ["tool_6", "tool_2", "tool_11"], "hasImages": false, "images": [] },
+                        { "id": 3302, "title": { "es": "Iniciar el proceso de reconfirmación de cada uno de los servicios incluidos.", "en": "Begin the process of reconfirming each of the included services" }, "roleId": "role_8", "kpiId": "kpi_31", "toolIds": ["tool_6", "tool_2", "tool_11"], "hasImages": false, "images": [] },
+                        { "id": 3303, "title": { "es": "Contactar a los proveedores utilizando el sistema Toursys o vía telefónica para validar los detalles.", "en": "Contact suppliers using the Toursys system or by phone to validate the details" }, "roleId": "role_8", "kpiId": "kpi_31", "toolIds": ["tool_6", "tool_2", "tool_11"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 34, "phaseId": 3, "order": 2, 
+                    "title": { "es": "Emitir y Distribuir Vouchers de Garantía a Proveedores Específicos", "en": "Issue and Distribute Guarantee Vouchers to Specific Suppliers" }, 
+                    "roleId": "role_8", "kpiId": "kpi_32", "toolIds": ["tool_6"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 3401, "title": { "es": "Una vez reconfirmados los servicios, identificar a los proveedores que requieren un voucher de garantía.", "en": "Once services are reconfirmed, identify suppliers that require a guarantee voucher" }, "roleId": "role_8", "kpiId": "kpi_32", "toolIds": ["tool_6"], "hasImages": false, "images": [] },
+                        { "id": 3402, "title": { "es": "Descargar los vouchers correspondientes desde el sistema Toursys.", "en": "Download the corresponding vouchers from the Toursys system" }, "roleId": "role_8", "kpiId": "kpi_32", "toolIds": ["tool_6"], "hasImages": false, "images": [] },
+                        { "id": 3403, "title": { "es": "Enviar los vouchers de garantía exclusivamente a los proveedores que los solicitan.", "en": "Send the guarantee vouchers exclusively to the suppliers who request them" }, "roleId": "role_8", "kpiId": "kpi_32", "toolIds": ["tool_6"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 35, "phaseId": 3, "order": 3, 
+                    "title": { "es": "Notificar al Diseñador la Finalización de Reconfirmación de Reservas y Mantener Reunión de Cierre", "en": "Notify the Designer of Booking Reconfirmation Completion and Hold a Closing Meeting" }, 
+                    "roleId": "role_8", "kpiId": "kpi_33", "toolIds": ["tool_6", "tool_2", "tool_4"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 3501, "title": { "es": "Una vez completadas todas las reconfirmaciones y el envío de vouchers, notificar al Diseñador Líder que el proceso está listo.", "en": "Once all reconfirmations and voucher submissions are complete, notify the Lead Designer that the process is ready" }, "roleId": "role_8", "kpiId": "kpi_33", "toolIds": ["tool_6", "tool_2", "tool_4"], "hasImages": false, "images": [] },
+                        { "id": 3502, "title": { "es": "Agendar y mantener una reunión con el Diseñador Líder para discutir todos los aspectos finales", "en": "Schedule and hold a meeting with the Lead Designer to discuss all final aspects" }, "roleId": "role_8", "kpiId": "kpi_33", "toolIds": ["tool_6", "tool_2", "tool_4"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 36, "phaseId": 3, "order": 4, 
+                    "title": { "es": "Activar y Gestionar el Canal de Soporte 24/7 para el Cliente", "en": "Activate and Manage the 24/7 Support Channel for the Client" }, 
+                    "roleId": "role_8", "kpiId": "kpi_34", "toolIds": ["tool_3"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 3601, "title": { "es": "Dos dias antes de la llegada del cliente al país, crear y abrir un chat de soporte.", "en": "Two days before the client's arrival in the country, create and open a support chat" }, "roleId": "role_8", "kpiId": "kpi_34", "toolIds": ["tool_3"], "hasImages": false, "images": [] },
+                        { "id": 3602, "title": { "es": "Enviar información importante del viaje al cliente a través del chat.", "en": "Send important travel information to the client through the chat" }, "roleId": "role_8", "kpiId": "kpi_34", "toolIds": ["tool_3"], "hasImages": false, "images": [] },
+                        { "id": 3603, "title": { "es": "Proveer acompañamiento y soporte continuo al cliente durante toda su estadía en el país a través de este canal.", "en": "Provide continuous support and assistance to the client throughout their stay in the country via this channel" }, "roleId": "role_8", "kpiId": "kpi_34", "toolIds": ["tool_3"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 37, "phaseId": 3, "order": 5, 
+                    "title": { "es": "Gestionar Modificaciones Solicitadas por el Cliente Durante el Viaje", "en": "Manage Modifications Requested by the Client During the Trip" }, 
+                    "roleId": "role_8", "kpiId": "kpi_35", "toolIds": ["tool_6", "tool_3", "tool_2"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 3701, "title": { "es": "Recibir y procesar cualquier solicitud de cambio o modificación por parte del cliente que se encuentre en el país.", "en": "Receive and process any change or modification request from the client who is in the country" }, "roleId": "role_8", "kpiId": "kpi_35", "toolIds": ["tool_6", "tool_3", "tool_2"], "hasImages": false, "images": [] },
+                        { "id": 3702, "title": { "es": "Ejecutar los cambios necesarios con los proveedores.", "en": "Execute the necessary changes with the suppliers" }, "roleId": "role_8", "kpiId": "kpi_35", "toolIds": ["tool_6", "tool_3", "tool_2"], "hasImages": false, "images": [] },
+                        { "id": 3703, "title": { "es": "Ingresar en Toursys todas las notas que considere relevantes para el Diseñador Líder.", "en": "Enter all relevant notes for the Lead Designer into Toursys" }, "roleId": "role_8", "kpiId": "kpi_35", "toolIds": ["tool_6", "tool_3", "tool_2"], "hasImages": false, "images": [] },
+                        { "id": 3704, "title": { "es": "Comunicar al Diseñados Líder y al Asistente Adminsitrativo por correo las modificaciones realizadas para el posterior ajuste en Toursys antes de la Facturación.", "en": "Communicate the modifications made to the Lead Designer and Administrative Assistant by email for subsequent adjustment in Toursys before Invoicing" }, "roleId": "role_8", "kpiId": "kpi_35", "toolIds": ["tool_6", "tool_3", "tool_2"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 38, "phaseId": 3, "order": 6, 
+                    "title": { "es": "Solicitar y Procesar Notas de Crédito por Cancelaciones o Cambios", "en": "Request and Process Credit Notes for Cancellations or Changes" }, 
+                    "roleId": "role_8", "kpiId": "kpi_36", "toolIds": ["tool_6", "tool_2"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 3801, "title": { "es": "Identificar todos los ajustes y cambios realizados por el cliente que resulten en una nota de crédito.", "en": "Identify all adjustments and changes made by the client that result in a credit note" }, "roleId": "role_8", "kpiId": "kpi_36", "toolIds": ["tool_6", "tool_2"], "hasImages": false, "images": [] },
+                        { "id": 3802, "title": { "es": "Recopilar la información y documentación necesaria para cada nota de crédito.", "en": "Gather the necessary information and documentation for each credit note" }, "roleId": "role_8", "kpiId": "kpi_36", "toolIds": ["tool_6", "tool_2"], "hasImages": false, "images": [] },
+                        { "id": 3803, "title": { "es": "Comunica por corro al Diseñador Líder el detalle de las notas de crédito existentes.", "en": "Communicate the details of existing credit notes to the Lead Designer by email" }, "roleId": "role_8", "kpiId": "kpi_36", "toolIds": ["tool_6", "tool_2"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 39, "phaseId": 4, "order": 1, 
+                    "title": { "es": "Enviar al cliente Cuestionario de Evaluación del Servicio.", "en": "Send the Service Evaluation Questionnaire to the Client" }, 
+                    "roleId": "role_8", "kpiId": "kpi_37", "toolIds": ["tool_3", "tool_1", "tool_21"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 3901, "title": { "es": "Preparar el cuestionario de evaluación del servicio.", "en": "Prepare the service evaluation questionnaire" }, "roleId": "role_8", "kpiId": "kpi_37", "toolIds": ["tool_3", "tool_1", "tool_21"], "hasImages": false, "images": [] },
+                        { "id": 3902, "title": { "es": "Enviar el cuestionario al cliente vía WhatsApp.", "en": "Send the questionnaire to the client via WhatsApp" }, "roleId": "role_8", "kpiId": "kpi_37", "toolIds": ["tool_3", "tool_1", "tool_21"], "hasImages": false, "images": [] },
+                        { "id": 3903, "title": { "es": "Recopilar y registrar el feedback en Monday para su análisis.", "en": "Collect and record the feedback in Monday for analysis" }, "roleId": "role_8", "kpiId": "kpi_37", "toolIds": ["tool_3", "tool_1", "tool_21"], "hasImages": false, "images": [] },
+                        { "id": 3904, "title": { "es": "Notificar al Diseñador Líder los resultados de este cuestionario.", "en": "Notify the Lead Designer of the results of this questionnaire" }, "roleId": "role_8", "kpiId": "kpi_37", "toolIds": ["tool_3", "tool_1", "tool_21"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 40, "phaseId": 4, "order": 2, 
+                    "title": { "es": "Realizar Ajustes de Factura.", "en": "Make Invoice Adjustments" }, 
+                    "roleId": "role_2", "kpiId": "kpi_36", "toolIds": ["tool_6", "tool_1"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 4001, "title": { "es": "Recibir la comunicación de cambios por parte de Operaciones.", "en": "Receive the communication of changes from Operations" }, "roleId": "role_2", "kpiId": "kpi_36", "toolIds": ["tool_6", "tool_1"], "hasImages": false, "images": [] },
+                        { "id": 4002, "title": { "es": "Aplicar los ajustes necesarios en la Propuesta Final dentro de Toursys.", "en": "Apply the necessary adjustments to the Final Proposal within Toursys" }, "roleId": "role_2", "kpiId": "kpi_36", "toolIds": ["tool_6", "tool_1"], "hasImages": false, "images": [] },
+                        { "id": 4003, "title": { "es": "Actualizar el importe total del lead en Monday para reflejar el cambio.", "en": "Update the total lead amount in Monday.com to reflect the change" }, "roleId": "role_2", "kpiId": "kpi_36", "toolIds": ["tool_6", "tool_1"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 41, "phaseId": 4, "order": 3, 
+                    "title": { "es": "Comunicación de las Nota de Crédito a Contabilidad", "en": "Communicate Credit Notes to Accounting" }, 
+                    "roleId": "role_2", "kpiId": "kpi_38", "toolIds": ["tool_6", "tool_2"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 4101, "title": { "es": "Recibir y analizar la notificación enviada por Operaciones, validando el detalle y la justificación de las notas de crédito generadas solicitados por el cliente", "en": "Receive and analyze the notification sent by Operations, validating the details and justification of the credit notes generated by the client's requests" }, "roleId": "role_2", "kpiId": "kpi_38", "toolIds": ["tool_6", "tool_2"], "hasImages": false, "images": [] },
+                        { "id": 4102, "title": { "es": "Enviar una notificación por correo a Contabilidad, detallando las notas de crédito existentes, para futuras aplicaciones.", "en": "Send a notification by email to Accounting, detailing the existing credit notes for future application" }, "roleId": "role_2", "kpiId": "kpi_38", "toolIds": ["tool_6", "tool_2"], "hasImages": false, "images": [] },
+                        { "id": 4103, "title": { "es": "Archivar una copia de la nota de crédito en la carpeta correspondiente.", "en": "File a copy of the credit note in the corresponding folder" }, "roleId": "role_2", "kpiId": "kpi_38", "toolIds": ["tool_6", "tool_2"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 42, "phaseId": 4, "order": 4, 
+                    "title": { "es": "Registrar la Nota de Crédito en Toursys para Aplicación Futura", "en": "Register the Credit Note in Toursys for Future Application" }, 
+                    "roleId": "role_6", "kpiId": "kpi_39", "toolIds": ["tool_6", "tool_2"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 4201, "title": { "es": "Recibir la notificación del Diseñador Líder y verificar que la información de la nota de crédito esté completa.", "en": "Receive the notification from the Lead Designer and verify that the credit note information is complete" }, "roleId": "role_6", "kpiId": "kpi_39", "toolIds": ["tool_6", "tool_2"], "hasImages": false, "images": [] },
+                        { "id": 4202, "title": { "es": "Acceder a Toursys y registrar la nota de crédito, asociándola al proveedor correspondiente.", "en": "Access Toursys and register the credit note, associating it with the corresponding supplier" }, "roleId": "role_6", "kpiId": "kpi_39", "toolIds": ["tool_6", "tool_2"], "hasImages": false, "images": [] },
+                        { "id": 4203, "title": { "es": "Asegurar que el saldo a favor quede correctamente reflejado en el sistema y disponible para ser utilizado en futuras reservas o servicios.", "en": "Ensure the credit balance is correctly reflected in the system and available for use in future bookings or services" }, "roleId": "role_6", "kpiId": "kpi_39", "toolIds": ["tool_6", "tool_2"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 43, "phaseId": 4, "order": 5, 
+                    "title": { "es": "Verificar y Cerrar el Lead.", "en": "Verify and Close the Lead" }, 
+                    "roleId": "role_7", "kpiId": "kpi_40", "toolIds": ["tool_6", "tool_1"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 4301, "title": { "es": "Realizar una comprobación cruzada entre el informe de Operaciones y el trabajo del Diseñador Líder para asegurar la integridad de la propuesta final en Toursys.", "en": "Perform a cross-check between the Operations report and the Lead Designer's work to ensure the integrity of the final proposal in Toursys" }, "roleId": "role_7", "kpiId": "kpi_40", "toolIds": ["tool_6", "tool_1"], "hasImages": false, "images": [] },
+                        { "id": 4302, "title": { "es": "Tras confirmar la exactitud de los datos, actualizar el margen de utilidad final en Monday.", "en": "After confirming the data's accuracy, update the final profit margin in Monday" }, "roleId": "role_7", "kpiId": "kpi_40", "toolIds": ["tool_6", "tool_1"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 44, "phaseId": 4, "order": 6, 
+                    "title": { "es": "Realizar Facturación Completa.", "en": "Perform Complete Invoicing" }, 
+                    "roleId": "role_7", "kpiId": "kpi_38", "toolIds": ["tool_6", "tool_1"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 4401, "title": { "es": "Crear la factura final del itinerario, asegurándose de enlazar y aplicar todos los pagos previamente registrados por Contabilidad para reflejar el saldo correcto", "en": "Create the final itinerary invoice, ensuring all previously registered payments by Accounting are linked and applied to reflect the correct balance" }, "roleId": "role_7", "kpiId": "kpi_38", "toolIds": ["tool_6", "tool_1"], "hasImages": false, "images": [] },
+                        { "id": 4402, "title": { "es": "Cambiar el estado del lead a \"Facturado\" en Monday para notificar la finalización del proceso de facturación.", "en": "Change the lead status to \"Invoiced\" in Monday to notify the completion of the invoicing process" }, "roleId": "role_7", "kpiId": "kpi_38", "toolIds": ["tool_6", "tool_1"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 45, "phaseId": 4, "order": 7, 
+                    "title": { "es": "Enviar Recordatorio de Cobro.", "en": "Send Payment Reminder" }, 
+                    "roleId": "role_6", "kpiId": "kpi_41", "toolIds": ["tool_2"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 4501, "title": { "es": "Identificar clientes/agentes con pagos pendientes de crédito.", "en": "Identify clients/agents with pending credit payments" }, "roleId": "role_6", "kpiId": "kpi_41", "toolIds": ["tool_2"], "hasImages": false, "images": [] },
+                        { "id": 4502, "title": { "es": "Enviar un correo de recordatorio de cobro al Diseñador Líder y al Asistente Administrativo", "en": "Send a payment reminder email to the Lead Designer and the Administrative Assistant" }, "roleId": "role_6", "kpiId": "kpi_41", "toolIds": ["tool_2"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 46, "phaseId": 4, "order": 8, 
+                    "title": { "es": "Gestionar Cobro a Clientes/Agente con Crédito.", "en": "Manage Collection from Clients/Agents with Credit" }, 
+                    "roleId": "role_7", "kpiId": "kpi_42", "toolIds": ["tool_2"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 4601, "title": { "es": "Recibir la notificación para proceder con el cobro.", "en": "Receive the notification to proceed with collection" }, "roleId": "role_7", "kpiId": "kpi_42", "toolIds": ["tool_2"], "hasImages": false, "images": [] },
+                        { "id": 4602, "title": { "es": "Contactar al cliente/agente por correo para solicitar el pago.", "en": "Contact the client/agent by email to request payment" }, "roleId": "role_7", "kpiId": "kpi_42", "toolIds": ["tool_2"], "hasImages": false, "images": [] },
+                        { "id": 4603, "title": { "es": "Realizar el seguimiento hasta recibir el pago.", "en": "Follow up until payment is received" }, "roleId": "role_7", "kpiId": "kpi_42", "toolIds": ["tool_2"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 47, "phaseId": 4, "order": 9, 
+                    "title": { "es": "Registrar Pagos Futuros.", "en": "Register Future Payments" }, 
+                    "roleId": "role_6", "kpiId": "kpi_43", "toolIds": ["tool_6"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 4701, "title": { "es": "Recibir la confirmación del pago.", "en": "Receive payment confirmation" }, "roleId": "role_6", "kpiId": "kpi_43", "toolIds": ["tool_6"], "hasImages": false, "images": [] },
+                        { "id": 4702, "title": { "es": "Comunicar la recepción del pago al Diseñador Líder y Asistente Administrativo.", "en": "Communicate the receipt of payment to the Lead Designer and Administrative Assistant" }, "roleId": "role_6", "kpiId": "kpi_43", "toolIds": ["tool_6"], "hasImages": false, "images": [] },
+                        { "id": 4703, "title": { "es": "Realizar el registro correspondiente en Toursys.", "en": "Make the corresponding registration in Toursys" }, "roleId": "role_6", "kpiId": "kpi_43", "toolIds": ["tool_6"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 48, "phaseId": 4, "order": 10, 
+                    "title": { "es": "Gestionar Retroalimentación del Cliente/Agente.", "en": "Manage Client/Agent Feedback" }, 
+                    "roleId": "role_2", "kpiId": "kpi_44", "toolIds": ["tool_2", "tool_1"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 4801, "title": { "es": "Analizar la retroalimentación del cliente/agente, previamente recopilada y enviadae Operaciones.", "en": "Analyze the client/agent feedback previously collected and sent by Operations" }, "roleId": "role_2", "kpiId": "kpi_44", "toolIds": ["tool_2", "tool_1"], "hasImages": false, "images": [] },
+                        { "id": 4802, "title": { "es": "Contactar directamente al cliente/agente para obtener más detalles, entender la causa raíz y identificar oportunidades de mejora para prevenir futuros inconvenientes.", "en": "Contact the client/agent directly to get more details, understand the root cause, and identify improvement opportunities to prevent future issues" }, "roleId": "role_2", "kpiId": "kpi_44", "toolIds": ["tool_2", "tool_1"], "hasImages": false, "images": [] },
+                        { "id": 4803, "title": { "es": "Documentar en Monday un resumen con los aspectos clave, conclusiones y acciones recomendadas derivadas del análisis completo.", "en": "Document a summary in Monday.com with key aspects, conclusions, and recommended actions derived from the complete analysis" }, "roleId": "role_2", "kpiId": "kpi_44", "toolIds": ["tool_2", "tool_1"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 49, "phaseId": 4, "order": 11, 
+                    "title": { "es": "Gestionar Pago de Comisión al Agente.", "en": "Manage Agent Commission Payment" }, 
+                    "roleId": "role_2", "kpiId": "kpi_45", "toolIds": ["tool_2", "tool_22"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 4901, "title": { "es": "Determinar si la venta se realizó a través de un intermediario. Si es un cliente directo, este proceso no aplica y se da por concluido.", "en": "Determine if the sale was made through an intermediary. If it is a direct client, this process does not apply and is concluded" }, "roleId": "role_2", "kpiId": "kpi_45", "toolIds": ["tool_2", "tool_22"], "hasImages": false, "images": [] },
+                        { "id": 4902, "title": { "es": "En caso de existir intermediación, solicitar al agente la factura que detalla el cobro de su comisión.", "en": "In case of intermediation, request the invoice from the agent detailing their commission" }, "roleId": "role_2", "kpiId": "kpi_45", "toolIds": ["tool_2", "tool_22"], "hasImages": false, "images": [] },
+                        { "id": 4903, "title": { "es": "Una vez recibida la factura, completar el \"Formulario de Solicitud de Pagos\" y remitirlo junto con la factura adjunta a Contabilidad para su procesamiento.", "en": "Once the invoice is received, complete the \"Payment Request Form\" and send it along with the attached invoice to Accounting for processing" }, "roleId": "role_2", "kpiId": "kpi_45", "toolIds": ["tool_2", "tool_22"], "hasImages": false, "images": [] }
+                    ]
+                },
+                {
+                    "id": 50, "phaseId": 4, "order": 12, 
+                    "title": { "es": "Procesar Pago de Agente.", "en": "Process Agent Payment" }, 
+                    "roleId": "role_6", "kpiId": "kpi_45", "toolIds": ["tool_6", "tool_22"], "hasDetails": true, "hasImages": false, "images": [],
+                    "substeps": [
+                        { "id": 5001, "title": { "es": "Recibir y verificar el Formulario de Solicitud de Pago.", "en": "Receive and verify the Payment Request Form" }, "roleId": "role_6", "kpiId": "kpi_45", "toolIds": ["tool_6", "tool_22"], "hasImages": false, "images": [] },
+                        { "id": 5002, "title": { "es": "Realizar el registro de la transacción en Toursys.", "en": "Record the transaction in Toursys" }, "roleId": "role_6", "kpiId": "kpi_45", "toolIds": ["tool_6", "tool_22"], "hasImages": false, "images": [] },
+                        { "id": 5003, "title": { "es": "Comunicar al Diseñador Líder y al Asistente Adminsitrativo que el pago ha sido realizado.", "en": "Communicate to the Lead Designer and Administrative Assistant that the payment has been made" }, "roleId": "role_6", "kpiId": "kpi_45", "toolIds": ["tool_6", "tool_22"], "hasImages": false, "images": [] }
+                    ]
+                }
+            ]
+        }
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- I18N & CONFIG ---
+            const translations = {
+                mainTitle: { es: 'Procesos', en: 'Processes' },
+                mainSubtitle: { es: 'Manual Corporativo', en: 'Corporate Manual' },
+                addPhase: { es: '<i class="fas fa-plus w-5 text-center"></i> Añadir Etapa', en: '<i class="fas fa-plus w-5 text-center"></i> Add Phase' },
+                parameters: { es: '<i class="fas fa-tasks w-5 text-center"></i> Parámetros', en: '<i class="fas fa-tasks w-5 text-center"></i> Parameters' },
+                saveChanges: { es: '<i class="fas fa-save w-5 text-center"></i> Guardar Cambios', en: '<i class="fas fa-save w-5 text-center"></i> Save Changes' },
+                changePasswordLabel: { es: 'Cambiar Contraseña', en: 'Change Password' },
+                newPasswordPlaceholder: { es: 'Nueva contraseña', en: 'New password' },
+                savePasswordTitle: { es: 'Guardar nueva contraseña', en: 'Save new password' },
+                lockAdminModeTitle: { es: 'Bloquear Modo Edición', en: 'Lock Edit Mode' },
+                unsavedChanges: { es: 'Tienes cambios sin guardar.', en: 'You have unsaved changes.' },
+                editModeTitle: { es: 'Modo Edición', en: 'Edit Mode' },
+                tableViewTitle: { es: 'Vista de Tabla', en: 'Table View' },
+                passwordModalSubtitle: { es: 'Ingresa la contraseña para desbloquear.', en: 'Enter the password to unlock.' },
+                passwordPlaceholder: { es: '••••••••', en: '••••••••' },
+                unlock: { es: '<i class="fas fa-unlock"></i> Desbloquear', en: '<i class="fas fa-unlock"></i> Unlock' },
+                addSubstep: { es: '<i class="fas fa-plus"></i> Añadir Subpaso', en: '<i class="fas fa-plus"></i> Add Substep' },
+                codeModalTitle: { es: 'Código Actualizado', en: 'Updated Code' },
+                codeModalSubtitle: { es: 'Copia todo el contenido de este cuadro y reemplaza el código de tu archivo HTML para guardar los cambios permanentemente.', en: 'Copy the entire content of this box and replace the code in your HTML file to save the changes permanently.' },
+                copyToClipboard: { es: '<i class="fas fa-copy"></i> Copiar al Portapapeles', en: '<i class="fas fa-copy"></i> Copy to Clipboard' },
+                downloadHTML: { es: '<i class="fas fa-download"></i> Descargar HTML', en: '<i class="fas fa-download"></i> Download HTML' },
+                cancel: { es: 'Cancelar', en: 'Cancel' },
+                confirm: { es: 'Confirmar', en: 'Confirm' },
+                ok: { es: 'Entendido', en: 'OK' },
+                parametersModalTitle: { es: 'Gestor de Parámetros', en: 'Parameter Manager' },
+                toolsTitle: { es: 'Herramientas', en: 'Tools' },
+                rolesTitle: { es: 'Roles', en: 'Roles' },
+                kpisTitle: { es: 'KPIs', en: 'KPIs' },
+                namePlaceholderES: { es: 'Nombre (ES)', en: 'Name (ES)' },
+                namePlaceholderEN: { es: 'Nombre (EN)', en: 'Name (EN)' },
+                linkPlaceholder: { es: 'Enlace (opcional)', en: 'Link (optional)' },
+                addTool: { es: 'Añadir Herramienta', en: 'Add Tool' },
+                addRole: { es: 'Añadir Rol', en: 'Add Role' },
+                addKpi: { es: 'Añadir KPI', en: 'Add KPI' },
+                close: { es: 'Cerrar', en: 'Close' },
+                previous: { es: 'Anterior', en: 'Previous' },
+                next: { es: 'Siguiente', en: 'Next' },
+                addStep: { es: '<i class="fas fa-plus"></i> Añadir Paso', en: '<i class="fas fa-plus"></i> Add Step' },
+                deleteStep: { es: 'Eliminar paso', en: 'Delete step' },
+                roleLabel: { es: 'ROL', en: 'ROLE' },
+                kpiLabel: { es: 'KPI / MEDICIÓN', en: 'KPI / METRIC' },
+                toolsLabel: { es: 'HERRAMIENTAS', en: 'TOOLS' },
+                imagesLabel: { es: 'Imágenes', en: 'Images' },
+                detailsLabel: { es: 'Detalles', en: 'Details' },
+                editDetails: { es: '<i class="fas fa-edit mr-2"></i> Editar Detalles', en: '<i class="fas fa-edit mr-2"></i> Edit Details' },
+                viewDetails: { es: '<i class="fas fa-list-ul mr-2"></i> Ver Detalles', en: '<i class="fas fa-list-ul mr-2"></i> View Details' },
+                addToolTag: { es: '<i class="fas fa-plus"></i> Añadir', en: '<i class="fas fa-plus"></i> Add' },
+                addImage: { es: 'Añadir imagen', en: 'Add image' },
+                deleteImage: { es: 'Eliminar imagen', en: 'Delete image' },
+                deletePhase: { es: 'Eliminar Etapa', en: 'Delete Phase' },
+                deleteSubstep: { es: 'Eliminar Subpaso', en: 'Delete Substep' },
+                noSubstepsAdmin: { es: 'No hay subpasos. Haz clic en "Añadir Subpaso" para empezar.', en: 'No substeps. Click "Add Substep" to start.' },
+                noSubstepsViewer: { es: 'No hay detalles adicionales para este paso.', en: 'No additional details for this step.' },
+                noMoreTools: { es: 'No hay más herramientas disponibles para añadir.', en: 'No more tools available to add.' },
+                passwordIncorrect: { es: 'Contraseña incorrecta.', en: 'Incorrect password.' },
+                passwordSuccess: { es: 'La contraseña ha sido actualizada con éxito.', en: 'Password updated successfully.' },
+                passwordError: { es: 'La nueva contraseña debe tener al menos 4 caracteres.', en: 'New password must be at least 4 characters long.' },
+                deleteConfirmTitle: { es: 'Eliminar', en: 'Delete' },
+                deletePhaseConfirmText: { es: '¿Estás seguro? Esto eliminará la etapa Y TODOS los pasos que contiene.', en: 'Are you sure? This will delete the phase AND ALL the steps it contains.' },
+                deleteStepConfirmText: { es: '¿Estás seguro de que quieres eliminar este paso? Esta acción no se puede deshacer.', en: 'Are you sure you want to delete this step? This action cannot be undone.' },
+                deleteSubstepConfirmText: { es: '¿Estás seguro de que quieres eliminar este subpaso?', en: 'Are you sure you want to delete this substep?' },
+                deleteImageConfirmText: { es: '¿Estás seguro de que quieres eliminar esta imagen?', en: 'Are you sure you want to delete this image?' },
+                successTitle: { es: 'Éxito', en: 'Success' },
+                errorTitle: { es: 'Error', en: 'Error' },
+                copied: { es: '<i class="fas fa-check"></i> ¡Copiado!', en: '<i class="fas fa-check"></i> Copied!' },
+                tableTitle: { es: 'Flujo de Proceso de Negocio', en: 'Business Process Workflow' },
+                tableHPhase: { es: 'Fase', en: 'Phase' },
+                tableHStep: { es: 'Paso', en: 'Step' },
+                tableHTools: { es: 'Herramientas', en: 'Tools' },
+                tableHRole: { es: 'Rol', en: 'Role' },
+                tableHMainStep: { es: 'Paso Principal', en: 'Main Step' },
+                tableHSubsteps: { es: 'Sub-pasos', en: 'Sub-steps' },
+                tableHKPI: { es: 'KPI Refinado', en: 'Refined KPI' },
+            };
+
+            // --- STATE MANAGEMENT ---
+            const dataElement = document.getElementById('app-data');
+            const appData = JSON.parse(dataElement.textContent);
+
+            let currentPassword = appData.password;
+            let currentParameters = appData.parameters;
+            let currentPhases = appData.phases;
+            let currentSteps = appData.steps;
+            
+            let isAdminMode = false;
+            let currentLang = 'es'; // 'es' or 'en'
+            let isTableView = false;
+            let hasUnsavedChanges = false;
+            let draggedItem = null;
+            let activeStepIdForSubsteps = null;
+            let confirmCallback = null;
+            let activeImageGallery = { items: [], parentId: null, isSubstep: false };
+            let activeImageIndex = 0;
+            let imageUploadTarget = { parentId: null, isSubstep: false };
+
+            // --- DOM ELEMENTS ---
+            const appBody = document.getElementById('app-body');
+            const sidebarNav = document.getElementById('sidebar-nav');
+            const processContentCards = document.getElementById('process-content-cards');
+            const processContent = document.getElementById('process-content');
+            const tableContent = document.getElementById('table-content');
+            const languageSwitcherContainer = document.getElementById('language-switcher-container');
+            const generateCodeBtn = document.getElementById('generate-code-btn');
+            const addPhaseBtn = document.getElementById('add-phase-btn');
+            const unsavedIndicator = document.getElementById('unsaved-indicator');
+            const lockBtn = document.getElementById('lock-btn');
+            const viewTableBtn = document.getElementById('view-table-btn');
+            const adminControls = document.getElementById('admin-controls');
+            const lockContainer = document.getElementById('lock-container');
+            const changePasswordInput = document.getElementById('change-password-input');
+            const changePasswordBtn = document.getElementById('change-password-btn');
+            const lockAdminModeBtn = document.getElementById('lock-admin-mode-btn');
+            const downloadCodeBtn = document.getElementById('download-code-btn');
+            const passwordModalContainer = document.getElementById('password-modal-container');
+            const passwordForm = document.getElementById('password-form');
+            const passwordInput = document.getElementById('password-input');
+            const passwordError = document.getElementById('password-error');
+            const closePasswordModalBtn = document.getElementById('close-password-modal');
+            const substepModalContainer = document.getElementById('substep-modal-container');
+            const substepModalTitle = document.getElementById('substep-modal-title');
+            const closeSubstepModalBtn = document.getElementById('close-substep-modal');
+            const substepList = document.getElementById('substep-list');
+            const addSubstepBtn = document.getElementById('add-substep-btn');
+            const codeModal = document.getElementById('code-modal');
+            const closeCodeModalBtn = codeModal.querySelector('.close-code-modal');
+            const confirmationModalContainer = document.getElementById('confirmation-modal-container');
+            const confirmationModalTitle = document.getElementById('confirmation-modal-title');
+            const confirmationModalText = document.getElementById('confirmation-modal-text');
+            const confirmActionBtn = document.getElementById('confirm-action-btn');
+            const cancelActionBtn = document.getElementById('cancel-action-btn');
+            const alertModalContainer = document.getElementById('alert-modal-container');
+            const alertModalTitle = document.getElementById('alert-modal-title');
+            const alertModalText = document.getElementById('alert-modal-text');
+            const okAlertBtn = document.getElementById('ok-alert-btn');
+            const parametersBtn = document.getElementById('parameters-btn');
+            const parametersModalContainer = document.getElementById('parameters-modal-container');
+            const closeParametersModalBtn = document.getElementById('close-parameters-modal');
+            const toolsList = document.getElementById('tools-list');
+            const rolesList = document.getElementById('roles-list');
+            const kpisList = document.getElementById('kpis-list');
+            const addToolForm = document.getElementById('add-tool-form');
+            const addRoleForm = document.getElementById('add-role-form');
+            const addKpiForm = document.getElementById('add-kpi-form');
+            const imageViewerModal = document.getElementById('image-viewer-modal');
+            const closeImageViewerBtn = document.getElementById('close-image-viewer');
+            const imageViewerImg = document.getElementById('image-viewer-img');
+            const imageViewerDescription = document.getElementById('image-viewer-description');
+            const imageViewerPrevBtn = document.getElementById('image-viewer-prev');
+            const imageViewerNextBtn = document.getElementById('image-viewer-next');
+            const imageFileInput = document.getElementById('image-file-input');
+
+            // --- TRANSLATION FUNCTION ---
+            function setUIContent() {
+                document.querySelectorAll('[data-translate-key]').forEach(el => {
+                    const key = el.dataset.translateKey;
+                    if (translations[key]) {
+                        el.innerHTML = translations[key][currentLang];
+                    }
+                });
+                document.querySelectorAll('[data-translate-key-placeholder]').forEach(el => {
+                    const key = el.dataset.translateKeyPlaceholder;
+                    if (translations[key]) {
+                        el.placeholder = translations[key][currentLang];
+                    }
+                });
+                 document.querySelectorAll('[data-translate-key-title]').forEach(el => {
+                    const key = el.dataset.translateKeyTitle;
+                    if (translations[key]) {
+                        el.title = translations[key][currentLang];
+                    }
+                });
+            }
+
+            // --- RENDER FUNCTIONS ---
+            function render() {
+                renderLanguageSwitcher();
+                renderSidebar();
+                if (isTableView) {
+                    renderProcessTable();
+                } else {
+                    renderContent();
+                }
+                setUIContent();
+                addEventListeners();
+                updateActiveNav();
+                toggleView(isTableView);
+            }
+
+            function renderLanguageSwitcher() {
+                if (isAdminMode) {
+                    languageSwitcherContainer.innerHTML = '';
+                    return;
+                }
+                languageSwitcherContainer.innerHTML = `
+                    <label for="lang-toggle" class="flex items-center cursor-pointer">
+                        <span class="mr-3 text-sm font-medium text-gray-700">ES</span>
+                        <div class="relative">
+                            <input type="checkbox" id="lang-toggle" class="sr-only lang-toggle" ${currentLang === 'en' ? 'checked' : ''}>
+                            <div class="block bg-gray-200 w-14 h-8 rounded-full"></div>
+                            <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform"></div>
+                        </div>
+                        <span class="ml-3 text-sm font-medium text-gray-700">EN</span>
+                    </label>
+                `;
+                document.getElementById('lang-toggle').addEventListener('change', (e) => {
+                    currentLang = e.target.checked ? 'en' : 'es';
+                    render();
+                });
+            }
+
+            function renderSidebar() {
+                currentPhases.sort((a, b) => a.order - b.order);
+                sidebarNav.innerHTML = currentPhases.map(phase => {
+                    const href = `#phase-${phase.id}`;
+                    if (isAdminMode) {
+                        return `
+                            <a href="${href}" data-id="${phase.id}" draggable="true">
+                                <i class="fas fa-grip-vertical drag-handle mr-3 mt-1"></i>
+                                <div class="flex-grow space-y-1">
+                                    <label class="bilingual-input-label">ES</label>
+                                    <input type="text" class="bilingual-input" value="${phase.name.es}" data-type="phase" data-id="${phase.id}" data-lang="es" data-field="name">
+                                    <label class="bilingual-input-label">EN</label>
+                                    <input type="text" class="bilingual-input" value="${phase.name.en}" data-type="phase" data-id="${phase.id}" data-lang="en" data-field="name">
+                                </div>
+                                <div class="phase-actions">
+                                    <button class="delete-phase-btn" title="${translations.deletePhase[currentLang]}"><i class="fas fa-trash-alt"></i></button>
+                                </div>
+                            </a>`;
+                    } else {
+                        return `
+                            <a href="${href}" data-id="${phase.id}">
+                                <span class="flex-grow">${phase.name[currentLang]}</span>
+                            </a>`;
+                    }
+                }).join('');
+            }
+
+            function renderContent() {
+                 processContent.innerHTML = currentPhases.map((phase, index) => {
+                    const stepsInPhase = currentSteps
+                        .filter(step => step.phaseId === phase.id)
+                        .sort((a, b) => a.order - b.order);
+                    
+                    const sectionClasses = index > 0 ? 'mt-8' : '';
+
+                    return `
+                        <section id="phase-${phase.id}" class="phase-section ${sectionClasses}">
+                            <div class="flex items-center justify-between mb-8">
+                                <h2 class="text-3xl font-extrabold">${phase.name[currentLang]}</h2>
+                                ${isAdminMode ? `<button class="add-step-btn btn btn-primary" data-phase-id="${phase.id}" data-translate-key="addStep"></button>` : ''}
+                            </div>
+                            <div class="steps-container grid grid-cols-1 gap-4" data-phase-id="${phase.id}">
+                                ${stepsInPhase.map(createStepCardHTML).join('')}
+                            </div>
+                        </section>
+                    `;
+                }).join('');
+            }
+            
+            function renderProcessTable() {
+                const tableHeaders = `
+                    <thead>
+                        <tr>
+                            <th data-translate-key="tableHPhase">${translations.tableHPhase[currentLang]}</th>
+                            <th data-translate-key="tableHStep">${translations.tableHStep[currentLang]}</th>
+                            <th data-translate-key="tableHTools">${translations.tableHTools[currentLang]}</th>
+                            <th data-translate-key="tableHRole">${translations.tableHRole[currentLang]}</th>
+                            <th data-translate-key="tableHMainStep">${translations.tableHMainStep[currentLang]}</th>
+                            <th data-translate-key="tableHSubsteps">${translations.tableHSubsteps[currentLang]}</th>
+                            <th data-translate-key="tableHKPI">${translations.tableHKPI[currentLang]}</th>
+                        </tr>
+                    </thead>
+                `;
+
+                const tableBody = currentPhases.map(phase => {
+                    const stepsInPhase = currentSteps
+                        .filter(step => step.phaseId === phase.id)
+                        .sort((a, b) => a.order - b.order);
+
+                    // Add a unique ID to the phase header row for scrolling
+                    const phaseHeader = `<tr id="phase-header-${phase.id}"><td colspan="7" class="phase-header">${phase.name[currentLang]}</td></tr>`;
+                    
+                    const stepRows = stepsInPhase.map(step => {
+                        const role = currentParameters.roles.find(r => r.id === step.roleId);
+                        const kpi = currentParameters.kpis.find(k => k.id === step.kpiId);
+                        const tools = (step.toolIds || []).map(id => currentParameters.tools.find(t => t.id === id)).filter(Boolean);
+                        
+                        const substepsHTML = (step.substeps || [])
+                            .map((sub, index) => `<p>${index + 1}. ${sub.title[currentLang]}</p>`)
+                            .join('');
+
+                        return `
+                            <tr>
+                                <td>${phase.name[currentLang]}</td>
+                                <td>${step.order}</td>
+                                <td>${tools.map(t => t.name[currentLang]).join(', ')}</td>
+                                <td>${role ? role.name[currentLang] : 'N/A'}</td>
+                                <td>${step.title[currentLang]}</td>
+                                <td>${substepsHTML || 'N/A'}</td>
+                                <td>${kpi ? kpi.name[currentLang] : 'N/A'}</td>
+                            </tr>
+                        `;
+                    }).join('');
+
+                    return phaseHeader + stepRows;
+                }).join('');
+
+                tableContent.innerHTML = `
+                    <h1 class="text-3xl font-bold text-center mb-6 text-gray-800" data-translate-key="tableTitle">${translations.tableTitle[currentLang]}</h1>
+                    <table class="process-table">
+                        ${tableHeaders}
+                        <tbody>${tableBody}</tbody>
+                    </table>
+                `;
+            }
+
+
+            function createStepCardHTML(step) {
+                const role = currentParameters.roles.find(r => r.id === step.roleId);
+                const kpi = currentParameters.kpis.find(k => k.id === step.kpiId);
+                const tools = (step.toolIds || []).map(id => currentParameters.tools.find(t => t.id === id)).filter(Boolean);
+
+                const mainContent = `
+                    <div class="step-card-header">
+                        <div class="flex items-center gap-3 w-full">
+                            ${isAdminMode ? '<i class="fas fa-grip-vertical drag-handle cursor-move"></i>' : ''}
+                            <span class="text-2xl font-black text-gray-300">#${step.order}</span>
+                            <div class="flex-grow">
+                                ${isAdminMode ? `
+                                    <div class="space-y-1">
+                                        <label class="bilingual-input-label">ES</label>
+                                        <input type="text" class="bilingual-input" value="${step.title.es}" data-type="step" data-id="${step.id}" data-lang="es" data-field="title">
+                                        <label class="bilingual-input-label">EN</label>
+                                        <input type="text" class="bilingual-input" value="${step.title.en}" data-type="step" data-id="${step.id}" data-lang="en" data-field="title">
+                                    </div>
+                                ` : `<h3 class="text-xl font-bold">${step.title[currentLang]}</h3>`}
+                            </div>
+                        </div>
+                        ${isAdminMode ? `<button class="delete-step-btn text-gray-400 hover:text-red-500 transition-colors ml-4" data-id="${step.id}" title="${translations.deleteStep[currentLang]}"><i class="fas fa-trash-alt"></i></button>` : ''}
+                    </div>
+                    <div class="step-card-body">
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="text-sm font-bold field-label tracking-wider flex items-center gap-2"><i class="fas fa-user-tie"></i>${translations.roleLabel[currentLang]}</label>
+                                    ${isAdminMode ? createSelectHTML('roleId', currentParameters.roles, step.roleId, step.id) : `<p class="font-semibold mt-1">${role ? role.name[currentLang] : 'N/A'}</p>`}
+                                </div>
+                                <div>
+                                    <label class="text-sm font-bold field-label tracking-wider flex items-center gap-2"><i class="fas fa-tachometer-alt"></i>${translations.kpiLabel[currentLang]}</label>
+                                    ${isAdminMode ? createSelectHTML('kpiId', currentParameters.kpis, step.kpiId, step.id) : `<p class="font-semibold mt-1">${kpi ? kpi.name[currentLang] : 'N/A'}</p>`}
+                                </div>
+                            </div>
+                            <div>
+                                <label class="text-sm font-bold field-label tracking-wider flex items-center gap-2"><i class="fas fa-tools"></i>${translations.toolsLabel[currentLang]}</label>
+                                <div class="flex flex-wrap gap-2 items-center mt-2">
+                                    ${tools.map(tool => createToolTagHTML(tool, step.id)).join('')}
+                                    ${isAdminMode ? `<button class="add-tool-btn btn btn-sm btn-secondary" data-step-id="${step.id}" data-translate-key="addToolTag"></button>` : ''}
+                                </div>
+                            </div>
+                            ${step.hasImages ? createImageGalleryHTML(step) : ''}
+                        </div>
+                    </div>`;
+
+                const footer = `
+                    <div class="p-3 bg-gray-50 border-t flex justify-between items-center mt-auto">
+                        <div class="admin-only-item items-center gap-4 w-full" style="display: ${isAdminMode ? 'flex' : 'none'};">
+                             <label for="image-toggle-${step.id}" class="flex items-center cursor-pointer">
+                                <span class="mr-3 text-sm font-medium text-gray-700">${translations.imagesLabel[currentLang]}</span>
+                                <div class="relative">
+                                    <input type="checkbox" id="image-toggle-${step.id}" class="sr-only image-toggle" data-step-id="${step.id}" ${step.hasImages ? 'checked' : ''}>
+                                    <div class="block bg-gray-200 w-14 h-8 rounded-full"></div>
+                                    <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform"></div>
+                                </div>
+                            </label>
+                            <label for="toggle-${step.id}" class="flex items-center cursor-pointer">
+                                <span class="mr-3 text-sm font-medium text-gray-700">${translations.detailsLabel[currentLang]}</span>
+                                <div class="relative">
+                                    <input type="checkbox" id="toggle-${step.id}" class="sr-only detail-toggle" data-step-id="${step.id}" ${step.hasDetails ? 'checked' : ''}>
+                                    <div class="block bg-gray-200 w-14 h-8 rounded-full"></div>
+                                    <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform"></div>
+                                </div>
+                            </label>
+                            <button class="edit-details-btn btn btn-sm btn-secondary ml-auto" data-step-id="${step.id}" style="display: ${isAdminMode && step.hasDetails ? 'flex' : 'none'};" data-translate-key="editDetails">
+                            </button>
+                        </div>
+                        <div class="viewer-item" style="display: ${step.hasDetails && !isAdminMode ? 'block' : 'none'}; margin-left: auto;">
+                            <button class="view-details-btn btn btn-sm btn-primary" data-step-id="${step.id}" data-translate-key="viewDetails">
+                            </button>
+                        </div>
+                    </div>`;
+
+                return `<div class="step-card" data-id="${step.id}" ${isAdminMode ? 'draggable="true"' : ''}>${mainContent}${footer}</div>`;
+            }
+            
+            function createSubstepCardHTML(substep, order) {
+                const role = currentParameters.roles.find(r => r.id === substep.roleId);
+                const kpi = currentParameters.kpis.find(k => k.id === substep.kpiId);
+                const tools = (substep.toolIds || []).map(id => currentParameters.tools.find(t => t.id === id)).filter(Boolean);
+
+                return `
+                    <div class="bg-white rounded-lg shadow-md p-4 border" data-substep-id="${substep.id}">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="flex items-start gap-3 w-full">
+                                <span class="text-xl font-bold text-gray-400 pt-1">#${order}</span>
+                                <div class="flex-grow">
+                                    ${isAdminMode ? `
+                                        <div class="space-y-1">
+                                            <label class="bilingual-input-label">ES</label>
+                                            <input type="text" class="bilingual-input" value="${substep.title.es}" data-type="substep" data-id="${substep.id}" data-lang="es" data-field="title">
+                                            <label class="bilingual-input-label">EN</label>
+                                            <input type="text" class="bilingual-input" value="${substep.title.en}" data-type="substep" data-id="${substep.id}" data-lang="en" data-field="title">
+                                        </div>
+                                    ` : `<h4 class="text-lg font-bold">${substep.title[currentLang]}</h4>`}
+                                </div>
+                            </div>
+                            ${isAdminMode ? `<button class="delete-substep-btn text-gray-400 hover:text-red-500 ml-4" data-substep-id="${substep.id}" title="${translations.deleteSubstep[currentLang]}"><i class="fas fa-trash-alt"></i></button>` : ''}
+                        </div>
+                         <div class="space-y-4 text-sm">
+                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                 <div>
+                                     <label class="font-bold field-label flex items-center gap-2"><i class="fas fa-user-tie"></i>${translations.roleLabel[currentLang]}</label>
+                                     ${isAdminMode ? createSelectHTML('roleId', currentParameters.roles, substep.roleId, substep.id, true) : `<p class="mt-1">${role ? role.name[currentLang] : 'N/A'}</p>`}
+                                 </div>
+                                 <div>
+                                     <label class="font-bold field-label flex items-center gap-2"><i class="fas fa-tachometer-alt"></i>${translations.kpiLabel[currentLang]}</label>
+                                     ${isAdminMode ? createSelectHTML('kpiId', currentParameters.kpis, substep.kpiId, substep.id, true) : `<p class="mt-1">${kpi ? kpi.name[currentLang] : 'N/A'}</p>`}
+                                 </div>
+                             </div>
+                             <div>
+                                 <label class="font-bold field-label flex items-center gap-2"><i class="fas fa-tools"></i>${translations.toolsLabel[currentLang]}</label>
+                                 <div class="flex flex-wrap gap-2 items-center mt-1">
+                                     ${tools.map(tool => createToolTagHTML(tool, substep.id, true)).join('')}
+                                     ${isAdminMode ? `<button class="add-tool-btn btn btn-sm btn-secondary" data-step-id="${substep.id}" data-is-substep="true" data-translate-key="addToolTag"></button>` : ''}
+                                 </div>
+                             </div>
+                             <div class="admin-only-item w-full mt-4" style="display: ${isAdminMode ? 'flex' : 'none'};">
+                                <label for="image-toggle-sub-${substep.id}" class="flex items-center cursor-pointer">
+                                    <span class="mr-3 text-sm font-medium text-gray-700">${translations.imagesLabel[currentLang]}</span>
+                                    <div class="relative">
+                                        <input type="checkbox" id="image-toggle-sub-${substep.id}" class="sr-only image-toggle" data-step-id="${substep.id}" data-is-substep="true" ${substep.hasImages ? 'checked' : ''}>
+                                        <div class="block bg-gray-200 w-14 h-8 rounded-full"></div>
+                                        <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform"></div>
+                                    </div>
+                                </label>
+                             </div>
+                             ${substep.hasImages ? createImageGalleryHTML(substep, true) : ''}
+                         </div>
+                    </div>
+                `;
+            }
+
+            function createToolTagHTML(tool, stepId, isSubstep = false) {
+                const tagContent = `<span>${tool.name[currentLang]}</span> ${isAdminMode ? `<button class="delete-tool-tag-btn ml-2 text-xs opacity-70 hover:opacity-100" data-tool-id="${tool.id}" data-step-id="${stepId}" ${isSubstep ? 'data-is-substep="true"' : ''}><i class="fas fa-times"></i></button>` : ''}`;
+                if (!isAdminMode && tool.link) {
+                    return `<a href="${tool.link}" target="_blank" rel="noopener noreferrer" class="tag has-link" title="Visitar ${tool.name[currentLang]}">${tagContent}</a>`;
+                }
+                return `<div class="tag">${tagContent}</div>`;
+            }
+             function createSelectHTML(field, options, selectedId, stepId, isSubstep = false) {
+                return `
+                    <select data-field="${field}" data-step-id="${stepId}" ${isSubstep ? 'data-is-substep="true"' : ''} class="w-full p-2 border border-gray-300 rounded-md custom-select mt-1">
+                        <option value="">N/A</option>
+                        ${options.map(opt => `<option value="${opt.id}" ${opt.id === selectedId ? 'selected' : ''}>${opt.name[currentLang]}</option>`).join('')}
+                    </select>
+                `;
+            }
+             function createImageGalleryHTML(item, isSubstep = false) {
+                const parentId = item.id;
+                return `
+                    <div class="mt-4">
+                        <label class="text-sm font-bold field-label tracking-wider flex items-center gap-2"><i class="fas fa-images"></i> ${translations.imagesLabel[currentLang].toUpperCase()}</label>
+                        <div class="image-gallery-container mt-2">
+                            ${(item.images || []).map(img => createImageThumbnailHTML(img, parentId, isSubstep)).join('')}
+                            ${isAdminMode ? `<button class="add-image-btn" data-parent-id="${parentId}" ${isSubstep ? 'data-is-substep="true"' : ''} title="${translations.addImage[currentLang]}"><i class="fas fa-plus fa-lg"></i></button>` : ''}
+                        </div>
+                    </div>
+                 `;
+            }
+            function createImageThumbnailHTML(image, parentId, isSubstep = false) {
+                return `
+                    <div class="image-thumbnail" data-image-id="${image.id}" data-parent-id="${parentId}" ${isSubstep ? 'data-is-substep="true"' : ''}>
+                        <img src="${image.path}" alt="${image.description[currentLang]}" onerror="this.src='https://placehold.co/80x80/EADFCE/1A2633?text=Error'; this.onerror=null;">
+                        ${isAdminMode ? `<button class="delete-image-btn" title="${translations.deleteImage[currentLang]}"><i class="fas fa-trash"></i></button>` : ''}
+                    </div>
+                `;
+            }
+
+
+            // --- CORE LOGIC ---
+            function enterAdminMode() {
+                isAdminMode = true;
+                appBody.classList.add('admin-mode');
+                adminControls.classList.remove('hidden');
+                lockContainer.classList.add('hidden');
+                viewTableBtn.classList.add('hidden'); // Hide table button in admin mode
+                if (isTableView) {
+                    isTableView = false; // Switch back to card view
+                }
+                render();
+            }
+
+            function exitAdminMode() {
+                isAdminMode = false;
+                appBody.classList.remove('admin-mode');
+                adminControls.classList.add('hidden');
+                lockContainer.classList.remove('hidden');
+                viewTableBtn.classList.remove('hidden'); // Show table button
+                render();
+            }
+            
+            function toggleView(showTable) {
+                isTableView = showTable;
+                if (showTable) {
+                    processContentCards.classList.add('hidden');
+                    tableContent.classList.remove('hidden');
+                    viewTableBtn.classList.add('text-accent-color');
+                    lockBtn.classList.remove('text-accent-color');
+                    sidebarNav.querySelectorAll('a').forEach(a => a.classList.remove('active'));
+                } else {
+                    processContentCards.classList.remove('hidden');
+                    tableContent.classList.add('hidden');
+                    viewTableBtn.classList.remove('text-accent-color');
+                    lockBtn.classList.add('text-accent-color');
+                    updateActiveNav();
+                }
+            }
+
+
+            function markUnsavedChanges() {
+                hasUnsavedChanges = true;
+                unsavedIndicator.classList.remove('hidden');
+            }
+
+            function updateData(id, type, field, lang, value) {
+                let item;
+                if (type === 'phase') {
+                    item = currentPhases.find(p => p.id == id);
+                } else if (type === 'step') {
+                    item = currentSteps.find(s => s.id == id);
+                } else if (type === 'substep') {
+                    currentSteps.forEach(step => {
+                        const substep = (step.substeps || []).find(ss => ss.id == id);
+                        if (substep) item = substep;
+                    });
+                } else if (type === 'parameter') {
+                    item = currentParameters[field].find(p => p.id === id); // here field is 'roles', 'kpis', 'tools'
+                    field = 'name'; // we are always updating the name
+                }
+
+                if (item) {
+                    if (!item[field]) item[field] = { es: '', en: '' };
+                    item[field][lang] = value;
+                    markUnsavedChanges();
+                }
+            }
+            
+            function updateSimpleData(id, type, field, value, isSubstep = false) {
+                 let item;
+                 if (isSubstep) {
+                     currentSteps.forEach(s => {
+                         const ss = (s.substeps || []).find(sub => sub.id == id);
+                         if (ss) item = ss;
+                     });
+                 } else {
+                     item = currentSteps.find(s => s.id == id);
+                 }
+                 if(item) {
+                    item[field] = value;
+                    markUnsavedChanges();
+                 }
+            }
+
+
+            // --- EVENT LISTENERS ---
+            function addEventListeners() {
+                // Input handling for admin mode
+                if (isAdminMode) {
+                    document.querySelectorAll('.bilingual-input').forEach(input => {
+                        input.addEventListener('input', (e) => {
+                            const { type, id, lang, field } = e.target.dataset;
+                            updateData(id, type, field, lang, e.target.value);
+                        });
+                    });
+                }
+
+                // General click delegation
+                processContent.onclick = function(e) {
+                    const detailToggle = e.target.closest('.detail-toggle');
+                    if (detailToggle) {
+                        const stepId = parseInt(detailToggle.dataset.stepId);
+                        const step = currentSteps.find(s => s.id === stepId);
+                        if (step) {
+                            step.hasDetails = detailToggle.checked;
+                            markUnsavedChanges();
+                            const card = detailToggle.closest('.step-card');
+                            if (card) card.outerHTML = createStepCardHTML(step);
+                            setUIContent(); // Re-apply translations
+                        }
+                        return;
+                    }
+
+                    const imageToggle = e.target.closest('.image-toggle:not([data-is-substep])');
+                    if (imageToggle) {
+                        const stepId = parseInt(imageToggle.dataset.stepId);
+                        const step = currentSteps.find(s => s.id === stepId);
+                        
+                        if (step) {
+                            step.hasImages = imageToggle.checked;
+                            markUnsavedChanges();
+                            const card = imageToggle.closest('.step-card');
+                            if (card) card.outerHTML = createStepCardHTML(step);
+                            setUIContent(); // Re-apply translations
+                        }
+                        return;
+                    }
+
+                    const viewDetailsBtn = e.target.closest('.view-details-btn, .edit-details-btn');
+                    if (viewDetailsBtn) {
+                        const stepId = parseInt(viewDetailsBtn.dataset.stepId);
+                        openSubstepModal(stepId);
+                        return;
+                    }
+
+                    const addStepBtn = e.target.closest('.add-step-btn');
+                    if (addStepBtn) {
+                        const phaseId = parseInt(addStepBtn.dataset.phaseId);
+                        const stepsInPhase = currentSteps.filter(s => s.phaseId === phaseId);
+                        const maxOrder = stepsInPhase.reduce((max, s) => Math.max(max, s.order || 0), 0);
+                        const newStep = {
+                            id: Date.now(),
+                            phaseId,
+                            order: maxOrder + 1,
+                            title: { es: "Nuevo Paso", en: "New Step" },
+                            roleId: null,
+                            toolIds: [],
+                            kpiId: null,
+                            hasDetails: false,
+                            hasImages: false,
+                            images: [],
+                            substeps: []
+                        };
+                        currentSteps.push(newStep);
+                        markUnsavedChanges();
+                        render();
+                        return;
+                    }
+
+                    const deleteStepBtn = e.target.closest('.delete-step-btn');
+                    if (deleteStepBtn) {
+                        showConfirmationModal(
+                            translations.deleteConfirmTitle[currentLang],
+                            translations.deleteStepConfirmText[currentLang],
+                            () => {
+                                currentSteps = currentSteps.filter(s => s.id != deleteStepBtn.dataset.id);
+                                markUnsavedChanges();
+                                render();
+                            }
+                        );
+                        return;
+                    }
+
+                    const deleteToolTagBtn = e.target.closest('.delete-tool-tag-btn');
+                    if (deleteToolTagBtn) {
+                        const { stepId, toolId } = deleteToolTagBtn.dataset;
+                        const item = currentSteps.find(s => s.id == stepId);
+
+                        if (item) {
+                            item.toolIds = item.toolIds.filter(id => id !== toolId);
+                            markUnsavedChanges();
+                            render();
+                        }
+                        return;
+                    }
+
+                    const addToolBtn = e.target.closest('.add-tool-btn:not([data-is-substep])');
+                    if (addToolBtn) {
+                        e.preventDefault();
+                        const stepId = addToolBtn.dataset.stepId;
+                        showToolSelector(addToolBtn, stepId, false);
+                        return;
+                    }
+                    
+                    const addImageBtn = e.target.closest('.add-image-btn:not([data-is-substep])');
+                    if (addImageBtn) {
+                        imageUploadTarget.parentId = parseInt(addImageBtn.dataset.parentId);
+                        imageUploadTarget.isSubstep = false;
+                        imageFileInput.click();
+                        return;
+                    }
+
+                    const deleteImageBtn = e.target.closest('.delete-image-btn');
+                    if (deleteImageBtn) {
+                        e.stopPropagation();
+                        const thumbnail = deleteImageBtn.closest('.image-thumbnail');
+                        const { imageId, parentId } = thumbnail.dataset;
+                        
+                        showConfirmationModal(translations.deleteConfirmTitle[currentLang], translations.deleteImageConfirmText[currentLang], () => {
+                            let parentItem = currentSteps.find(s => s.id == parentId);
+                            if (parentItem && parentItem.images) {
+                                parentItem.images = parentItem.images.filter(img => img.id != imageId);
+                                markUnsavedChanges();
+                                render();
+                            }
+                        });
+                        return;
+                    }
+
+                    const imageThumbnail = e.target.closest('.image-thumbnail:not([data-is-substep])');
+                    if (imageThumbnail) {
+                        const { parentId, imageId } = imageThumbnail.dataset;
+                        let parentItem = currentSteps.find(s => s.id == parentId);
+                        const startIndex = parentItem.images.findIndex(img => img.id == imageId);
+                        openImageViewer(parentItem.images, startIndex, parentId, false);
+                        return;
+                    }
+                };
+
+                processContent.onchange = function(e) {
+                    if (e.target.matches('select[data-field]')) {
+                        const { field, stepId, isSubstep } = e.target.dataset;
+                        updateSimpleData(stepId, 'step', field, e.target.value || null, isSubstep === 'true');
+                    }
+                };
+                
+                sidebarNav.onclick = function(e) {
+                    const link = e.target.closest('a');
+                    if (!link) return;
+
+                    const deletePhaseBtn = e.target.closest('.delete-phase-btn');
+                    if (deletePhaseBtn) {
+                        e.stopPropagation(); 
+                        e.preventDefault();  
+                        showConfirmationModal(
+                            translations.deleteConfirmTitle[currentLang],
+                            translations.deletePhaseConfirmText[currentLang],
+                            () => {
+                                const phaseId = parseInt(deletePhaseBtn.closest('a').dataset.id);
+                                currentPhases = currentPhases.filter(p => p.id !== phaseId);
+                                currentSteps = currentSteps.filter(s => s.phaseId !== phaseId);
+                                markUnsavedChanges();
+                                render();
+                            }
+                        );
+                        return;
+                    }
+
+                    // NEW: Context-aware navigation
+                    e.preventDefault();
+                    const phaseId = link.dataset.id;
+                    if (isTableView) {
+                        const targetEl = document.getElementById(`phase-header-${phaseId}`);
+                        if (targetEl) {
+                            targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    } else {
+                        const targetEl = document.getElementById(`phase-${phaseId}`);
+                        if (targetEl) {
+                           processContentCards.scrollTo({ top: targetEl.offsetTop - 64, behavior: 'smooth' });
+                        }
+                    }
+                };
+
+                if (!isAdminMode) return;
+
+                addPhaseBtn.onclick = () => {
+                    const maxOrder = currentPhases.reduce((max, p) => Math.max(max, p.order || 0), 0);
+                    const newPhase = { id: Date.now(), name: { es: "Nueva Etapa", en: "New Phase" }, order: maxOrder + 1 };
+                    currentPhases.push(newPhase);
+                    markUnsavedChanges();
+                    render();
+                };
+                
+                document.querySelectorAll('.step-card, .sidebar-nav a').forEach(item => {
+                    item.addEventListener('dragstart', (e) => {
+                        if (!isAdminMode) { e.preventDefault(); return; }
+                        draggedItem = e.currentTarget;
+                        setTimeout(() => {
+                            if (draggedItem) {
+                                draggedItem.classList.add('dragging');
+                            }
+                        }, 0);
+                    });
+                });
+
+                document.querySelectorAll('.steps-container, .sidebar-nav').forEach(container => {
+                    container.addEventListener('dragover', (e) => { e.preventDefault(); });
+                    container.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        if (!draggedItem) return;
+
+                        if (draggedItem.matches('.step-card')) {
+                            const fromStepId = parseInt(draggedItem.dataset.id);
+                            const toPhaseId = parseInt(container.dataset.phaseId);
+                            const stepToMove = currentSteps.find(s => s.id === fromStepId);
+                            stepToMove.phaseId = toPhaseId;
+                            
+                            const stepsInNewPhase = currentSteps.filter(s => s.phaseId === toPhaseId);
+                            const toEl = e.target.closest('.step-card');
+                            stepsInNewPhase.sort((a,b) => a.order - b.order);
+                            let stepIdsInPhase = stepsInNewPhase.map(s => s.id);
+                            const fromIndex = stepIdsInPhase.indexOf(fromStepId);
+                            if(fromIndex > -1) stepIdsInPhase.splice(fromIndex, 1);
+                            
+                            if (toEl) {
+                                const toIndex = stepIdsInPhase.indexOf(parseInt(toEl.dataset.id));
+                                stepIdsInPhase.splice(toIndex, 0, fromStepId);
+                            } else {
+                                stepIdsInPhase.push(fromStepId);
+                            }
+                            stepIdsInPhase.forEach((id, index) => {
+                                const step = currentSteps.find(s => s.id == id);
+                                if(step) step.order = index + 1;
+                            });
+                        } else if (draggedItem.matches('.sidebar-nav a')) {
+                            const fromPhaseId = parseInt(draggedItem.dataset.id);
+                            const toEl = e.target.closest('a');
+                            const phaseIds = currentPhases.map(p => p.id);
+                            const fromIndex = phaseIds.indexOf(fromPhaseId);
+                            phaseIds.splice(fromIndex, 1);
+                            if(toEl) {
+                                const toIndex = phaseIds.indexOf(parseInt(toEl.dataset.id));
+                                phaseIds.splice(toIndex, 0, fromPhaseId);
+                            } else {
+                                phaseIds.push(fromPhaseId);
+                            }
+                            phaseIds.forEach((id, index) => {
+                                const phase = currentPhases.find(p => p.id == id);
+                                if(phase) phase.order = index + 1;
+                            });
+                        }
+                        markUnsavedChanges();
+                        render();
+                    });
+                });
+            }
+            
+            function updateActiveNav() {
+                if (isTableView) return; // Don't highlight sidebar links in table view
+                const sections = document.querySelectorAll('.phase-section');
+                let current = '';
+                const scrollPosition = document.querySelector('#process-content-cards').scrollTop;
+                sections.forEach(section => {
+                    if (scrollPosition >= section.offsetTop - 65) {
+                        current = section.getAttribute('id');
+                    }
+                });
+                sidebarNav.querySelectorAll('a').forEach(a => {
+                    a.classList.remove('active');
+                    if (a.getAttribute('href') === `#${current}`) {
+                        a.classList.add('active');
+                    }
+                });
+            }
+            document.querySelector('#process-content-cards').onscroll = updateActiveNav;
+
+            // --- MODAL LOGIC ---
+            function openSubstepModal(stepId) {
+                activeStepIdForSubsteps = stepId;
+                const step = currentSteps.find(s => s.id === stepId);
+                if (!step) return;
+
+                substepModalTitle.textContent = step.title[currentLang];
+                renderSubsteps();
+                openModal(substepModalContainer);
+            }
+            
+            function openModal(modalContainer) {
+                modalContainer.classList.add('visible');
+            }
+
+            function closeModal(modalContainer) {
+                modalContainer.classList.remove('visible');
+            }
+
+            lockBtn.onclick = () => {
+                if (isTableView) {
+                    toggleView(false);
+                } else {
+                    openModal(passwordModalContainer);
+                }
+            };
+            
+            viewTableBtn.onclick = () => {
+                 if (!isTableView) {
+                    renderProcessTable();
+                }
+                toggleView(!isTableView);
+            };
+
+            lockAdminModeBtn.onclick = exitAdminMode;
+            closePasswordModalBtn.onclick = () => closeModal(passwordModalContainer);
+            passwordModalContainer.onclick = (e) => {
+                if (e.target === passwordModalContainer) closeModal(passwordModalContainer);
+            };
+
+            passwordForm.onsubmit = (e) => {
+                e.preventDefault();
+                passwordError.textContent = '';
+                if (passwordInput.value === currentPassword) {
+                    closeModal(passwordModalContainer);
+                    enterAdminMode();
+                } else {
+                    passwordError.textContent = translations.passwordIncorrect[currentLang];
+                    const modalContent = passwordModalContainer.querySelector('.modal-content');
+                    modalContent.classList.add('shake');
+                    setTimeout(() => modalContent.classList.remove('shake'), 500);
+                }
+            };
+
+            changePasswordBtn.onclick = () => {
+                const newPassword = changePasswordInput.value;
+                if(newPassword && newPassword.length >= 4) {
+                    currentPassword = newPassword;
+                    changePasswordInput.value = '';
+                    showAlertModal(translations.successTitle[currentLang], translations.passwordSuccess[currentLang]);
+                    markUnsavedChanges();
+                } else {
+                    showAlertModal(translations.errorTitle[currentLang], translations.passwordError[currentLang]);
+                }
+            };
+            
+            function getFullSource() {
+                const clone = document.documentElement.cloneNode(true);
+                
+                clone.querySelector('#app-body').classList.remove('admin-mode');
+                clone.querySelectorAll('.sidebar-nav a.active').forEach(el => el.classList.remove('active'));
+                clone.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging'));
+                clone.querySelectorAll('.modal-container.visible').forEach(el => el.classList.remove('visible'));
+                
+                clone.querySelector('#unsaved-indicator').classList.add('hidden');
+                clone.querySelector('#admin-controls').classList.add('hidden');
+                clone.querySelector('#lock-container').classList.remove('hidden');
+
+                // Ensure the correct view is shown by default (card view)
+                clone.querySelector('#process-content-cards').classList.remove('hidden');
+                clone.querySelector('#table-content').classList.add('hidden');
+
+                const newData = {
+                    password: currentPassword,
+                    parameters: currentParameters,
+                    phases: currentPhases,
+                    steps: currentSteps
+                };
+                
+                const dataElementClone = clone.querySelector('#app-data');
+                dataElementClone.textContent = `\n${JSON.stringify(newData, null, 4)}\n    `;
+                
+                let html = clone.outerHTML;
+                return `<!DOCTYPE html>\n${html}`;
+            }
+
+            generateCodeBtn.onclick = () => {
+                document.getElementById('code-output').value = getFullSource();
+                openModal(codeModal);
+            };
+
+            downloadCodeBtn.onclick = () => {
+                const codeToDownload = getFullSource();
+                const blob = new Blob([codeToDownload], { type: 'text/html' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'proceso-corporativo-actualizado.html';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(a.href);
+            };
+            
+            function closeSubstepModal() {
+                closeModal(substepModalContainer);
+                activeStepIdForSubsteps = null;
+            }
+
+            function renderSubsteps() {
+                if (activeStepIdForSubsteps === null) return;
+                const step = currentSteps.find(s => s.id === activeStepIdForSubsteps);
+                if (!step) return;
+                
+                document.getElementById('substep-modal-footer').style.display = isAdminMode ? 'flex' : 'none';
+
+                if (!step.substeps || step.substeps.length === 0) {
+                    substepList.innerHTML = isAdminMode 
+                        ? `<p class="text-center text-gray-500 py-8">${translations.noSubstepsAdmin[currentLang]}</p>`
+                        : `<p class="text-center text-gray-500 py-8">${translations.noSubstepsViewer[currentLang]}</p>`;
+                    return;
+                }
+
+                substepList.innerHTML = step.substeps.map((substep, index) => createSubstepCardHTML(substep, index + 1)).join('');
+                setUIContent(); // Apply translations to the newly rendered substeps
+            }
+
+            substepList.addEventListener('input', (e) => {
+                if (e.target.matches('.bilingual-input')) {
+                    const { type, id, lang, field } = e.target.dataset;
+                    updateData(id, type, field, lang, e.target.value);
+                }
+            });
+
+            substepList.addEventListener('change', (e) => {
+                if (e.target.matches('select[data-is-substep="true"]')) {
+                    const { field, stepId } = e.target.dataset; 
+                    const step = currentSteps.find(s => s.id === activeStepIdForSubsteps);
+                    const substep = step.substeps.find(ss => ss.id == stepId);
+                    if (substep) {
+                        substep[field] = e.target.value || null;
+                        markUnsavedChanges();
+                    }
+                }
+            });
+
+            substepList.addEventListener('click', e => {
+                const deleteBtn = e.target.closest('.delete-substep-btn');
+                if (deleteBtn) {
+                    const substepId = parseInt(deleteBtn.dataset.substepId);
+                     showConfirmationModal(
+                        translations.deleteConfirmTitle[currentLang],
+                        translations.deleteSubstepConfirmText[currentLang],
+                        () => {
+                            const step = currentSteps.find(s => s.id === activeStepIdForSubsteps);
+                            if(step) {
+                                step.substeps = step.substeps.filter(ss => ss.id !== substepId);
+                                markUnsavedChanges();
+                                renderSubsteps();
+                            }
+                        }
+                    );
+                    return;
+                }
+
+                const imageToggle = e.target.closest('.image-toggle[data-is-substep="true"]');
+                if (imageToggle) {
+                    const substepId = parseInt(imageToggle.dataset.stepId);
+                    const step = currentSteps.find(s => s.id === activeStepIdForSubsteps);
+                    const substep = step.substeps.find(ss => ss.id === substepId);
+                    if (substep) {
+                        substep.hasImages = imageToggle.checked;
+                        markUnsavedChanges();
+                        renderSubsteps();
+                    }
+                    return;
+                }
+                
+                const addImageBtn = e.target.closest('.add-image-btn[data-is-substep="true"]');
+                if (addImageBtn) {
+                    imageUploadTarget.parentId = parseInt(addImageBtn.dataset.parentId);
+                    imageUploadTarget.isSubstep = true;
+                    imageFileInput.click();
+                    return;
+                }
+
+                const addToolBtn = e.target.closest('.add-tool-btn[data-is-substep="true"]');
+                if (addToolBtn) {
+                    e.preventDefault();
+                    const substepId = addToolBtn.dataset.stepId;
+                    showToolSelector(addToolBtn, substepId, true);
+                    return;
+                }
+
+                const deleteToolTagBtn = e.target.closest('.delete-tool-tag-btn[data-is-substep="true"]');
+                if (deleteToolTagBtn) {
+                    const { stepId, toolId } = deleteToolTagBtn.dataset; // stepId is substepId
+                    const step = currentSteps.find(s => s.id === activeStepIdForSubsteps);
+                    const substep = step.substeps.find(ss => ss.id == stepId);
+                    if (substep) {
+                        substep.toolIds = substep.toolIds.filter(id => id !== toolId);
+                        markUnsavedChanges();
+                        renderSubsteps();
+                    }
+                    return;
+                }
+                
+                const imageThumbnail = e.target.closest('.image-thumbnail[data-is-substep="true"]');
+                if (imageThumbnail) {
+                    const { parentId, imageId } = imageThumbnail.dataset;
+                    const step = currentSteps.find(s => s.id === activeStepIdForSubsteps);
+                    if (step && step.substeps) {
+                        const substep = step.substeps.find(ss => ss.id == parentId);
+                        if (substep && substep.images) {
+                            const startIndex = substep.images.findIndex(img => img.id == imageId);
+                            if (startIndex !== -1) {
+                                openImageViewer(substep.images, startIndex, parentId, true);
+                            }
+                        }
+                    }
+                    return;
+                }
+            });
+            
+            closeSubstepModalBtn.onclick = closeSubstepModal;
+            addSubstepBtn.onclick = () => {
+                const step = currentSteps.find(s => s.id === activeStepIdForSubsteps);
+                if(step) {
+                    if (!step.substeps) step.substeps = [];
+                    step.substeps.push({
+                        id: Date.now(), title: { es: "Nuevo Subpaso", en: "New Substep" },
+                        roleId: null, kpiId: null, toolIds: [], hasImages: false, images: []
+                    });
+                    markUnsavedChanges();
+                    renderSubsteps();
+                }
+            };
+            
+            closeCodeModalBtn.onclick = () => closeModal(codeModal);
+            
+            document.getElementById('copy-code-btn').onclick = (e) => {
+                document.getElementById('code-output').select();
+                document.execCommand('copy');
+                const target = e.currentTarget;
+                const originalText = target.innerHTML;
+                target.innerHTML = translations.copied[currentLang];
+                setTimeout(() => { target.innerHTML = originalText; }, 2000);
+            };
+
+            function showConfirmationModal(title, text, callback) {
+                confirmationModalTitle.textContent = title;
+                confirmationModalText.textContent = text;
+                confirmCallback = callback;
+                openModal(confirmationModalContainer);
+            }
+
+            function hideConfirmationModal() {
+                closeModal(confirmationModalContainer);
+                confirmCallback = null;
+            }
+
+            function showAlertModal(title, text) {
+                alertModalTitle.textContent = title;
+                alertModalText.textContent = text;
+                openModal(alertModalContainer);
+            }
+
+            confirmActionBtn.onclick = () => {
+                if (confirmCallback) {
+                    confirmCallback();
+                }
+                hideConfirmationModal();
+            };
+            cancelActionBtn.onclick = hideConfirmationModal;
+            okAlertBtn.onclick = () => closeModal(alertModalContainer);
+
+            function renderParameters() {
+                toolsList.innerHTML = currentParameters.tools.map(item => createParameterItemHTML('tool', 'tools', item)).join('');
+                rolesList.innerHTML = currentParameters.roles.map(item => createParameterItemHTML('role', 'roles', item)).join('');
+                kpisList.innerHTML = currentParameters.kpis.map(item => createParameterItemHTML('kpi', 'kpis', item)).join('');
+            }
+
+            function createParameterItemHTML(type, field, item) {
+                return `
+                    <div class="flex items-center justify-between p-2 border rounded-md bg-white">
+                        <div class="flex-grow space-y-1 mr-2">
+                           <input type="text" class="bilingual-input" value="${item.name.es}" data-type="parameter" data-id="${item.id}" data-lang="es" data-field="${field}">
+                           <input type="text" class="bilingual-input" value="${item.name.en}" data-type="parameter" data-id="${item.id}" data-lang="en" data-field="${field}">
+                           ${type === 'tool' && item.link ? `<input type="text" class="bilingual-input mt-1 text-xs text-gray-500" value="${item.link}" data-type="parameter" data-id="${item.id}" data-lang="link" data-field="${field}">` : ''}
+                        </div>
+                        <button class="delete-parameter-btn text-red-500 hover:text-red-700" data-type="${type}" data-id="${item.id}"><i class="fas fa-trash"></i></button>
+                    </div>
+                `;
+            }
+
+            parametersBtn.onclick = () => {
+                renderParameters();
+                openModal(parametersModalContainer);
+            };
+            closeParametersModalBtn.onclick = () => closeModal(parametersModalContainer);
+
+            addToolForm.onsubmit = (e) => {
+                e.preventDefault();
+                currentParameters.tools.push({ id: `tool_${Date.now()}`, name: { es: document.getElementById('new-tool-name-es').value, en: document.getElementById('new-tool-name-en').value }, link: document.getElementById('new-tool-link').value });
+                markUnsavedChanges();
+                renderParameters();
+                e.target.reset();
+            };
+            addRoleForm.onsubmit = (e) => {
+                e.preventDefault();
+                currentParameters.roles.push({ id: `role_${Date.now()}`, name: { es: document.getElementById('new-role-name-es').value, en: document.getElementById('new-role-name-en').value } });
+                markUnsavedChanges();
+                renderParameters();
+                e.target.reset();
+            };
+            addKpiForm.onsubmit = (e) => {
+                e.preventDefault();
+                currentParameters.kpis.push({ id: `kpi_${Date.now()}`, name: { es: document.getElementById('new-kpi-name-es').value, en: document.getElementById('new-kpi-name-en').value } });
+                markUnsavedChanges();
+                renderParameters();
+                e.target.reset();
+            };
+
+            parametersModalContainer.addEventListener('input', (e) => {
+                if (e.target.matches('.bilingual-input')) {
+                    const { type, id, lang, field } = e.target.dataset;
+                    const item = currentParameters[field].find(p => p.id === id);
+                    if (item) {
+                        if (lang === 'link') {
+                            item.link = e.target.value;
+                        } else {
+                            item.name[lang] = e.target.value;
+                        }
+                        markUnsavedChanges();
+                    }
+                }
+            });
+
+            parametersModalContainer.onclick = (e) => {
+                if (e.target.closest('.delete-parameter-btn')) {
+                    const { type, id } = e.target.closest('.delete-parameter-btn').dataset;
+                    currentParameters[`${type}s`] = currentParameters[`${type}s`].filter(item => item.id !== id);
+                    
+                    currentSteps.forEach(step => {
+                        if (type === 'tool' && step.toolIds) {
+                            step.toolIds = step.toolIds.filter(toolId => toolId !== id);
+                        } else if (step[`${type}Id`] === id) {
+                            step[`${type}Id`] = null;
+                        }
+                        if (step.substeps) {
+                            step.substeps.forEach(substep => {
+                                if (type === 'tool' && substep.toolIds) {
+                                    substep.toolIds = substep.toolIds.filter(toolId => toolId !== id);
+                                } else if (substep[`${type}Id`] === id) {
+                                    substep[`${type}Id`] = null;
+                                }
+                            });
+                        }
+                    });
+                    markUnsavedChanges();
+                    renderParameters();
+                    render();
+                }
+            };
+
+            function showToolSelector(button, id, isSubstep = false) {
+                const existingSelector = document.querySelector('.tool-selector');
+                if (existingSelector) existingSelector.remove();
+
+                let item;
+                if (isSubstep) {
+                    const step = currentSteps.find(s => s.id === activeStepIdForSubsteps);
+                    item = step.substeps.find(ss => ss.id == id);
+                } else {
+                    item = currentSteps.find(s => s.id == id);
+                }
+                if (!item) return;
+
+                const availableTools = currentParameters.tools.filter(tool => !(item.toolIds || []).includes(tool.id));
+
+                if (availableTools.length === 0) {
+                    showAlertModal('Info', translations.noMoreTools[currentLang]);
+                    return;
+                }
+
+                const selector = document.createElement('div');
+                selector.className = 'tool-selector';
+                selector.innerHTML = availableTools.map(tool => 
+                    `<div class="tool-selector-item" data-tool-id="${tool.id}">${tool.name[currentLang]}</div>`
+                ).join('');
+
+                document.body.appendChild(selector);
+                const btnRect = button.getBoundingClientRect();
+                selector.style.left = `${btnRect.left}px`;
+                selector.style.top = `${btnRect.bottom + window.scrollY}px`;
+
+                const handleSelection = (e) => {
+                    const selectedItem = e.target.closest('.tool-selector-item');
+                    if (selectedItem) {
+                        const toolId = selectedItem.dataset.toolId;
+                        if (!item.toolIds) item.toolIds = [];
+                        item.toolIds.push(toolId);
+                        markUnsavedChanges();
+                        isSubstep ? renderSubsteps() : render();
+                    }
+                    selector.remove();
+                    window.removeEventListener('click', closeHandler, true);
+                };
+
+                const closeHandler = (e) => {
+                    if (!selector.contains(e.target) && e.target !== button) {
+                        selector.remove();
+                        window.removeEventListener('click', closeHandler, true);
+                    }
+                };
+
+                selector.addEventListener('click', handleSelection);
+                setTimeout(() => window.addEventListener('click', closeHandler, true), 0);
+            }
+            
+            function openImageViewer(images, startIndex, parentId, isSubstep) {
+                activeImageGallery.items = images;
+                activeImageGallery.parentId = parentId;
+                activeImageGallery.isSubstep = isSubstep;
+                activeImageIndex = startIndex;
+                renderActiveImageInViewer();
+                openModal(imageViewerModal);
+            }
+
+            function closeImageViewer() {
+                closeModal(imageViewerModal);
+            }
+
+            function renderActiveImageInViewer() {
+                if (activeImageGallery.items.length === 0) {
+                    closeImageViewer();
+                    return;
+                }
+                const image = activeImageGallery.items[activeImageIndex];
+                imageViewerImg.src = image.path;
+                imageViewerImg.alt = image.description[currentLang];
+                
+                if (isAdminMode) {
+                    imageViewerDescription.innerHTML = `
+                        <div class="space-y-1 text-left">
+                            <label class="bilingual-input-label">ES</label>
+                            <input type="text" class="bilingual-input bg-transparent text-white border-white/20" value="${image.description.es}" data-type="image" data-id="${image.id}" data-lang="es" data-field="description">
+                            <label class="bilingual-input-label">EN</label>
+                            <input type="text" class="bilingual-input bg-transparent text-white border-white/20" value="${image.description.en}" data-type="image" data-id="${image.id}" data-lang="en" data-field="description">
+                        </div>
+                    `;
+                } else {
+                    imageViewerDescription.innerHTML = `<p>${image.description[currentLang]}</p>`;
+                }
+                
+                imageViewerPrevBtn.style.display = activeImageGallery.items.length > 1 ? 'flex' : 'none';
+                imageViewerNextBtn.style.display = activeImageGallery.items.length > 1 ? 'flex' : 'none';
+            }
+            
+            imageViewerDescription.addEventListener('input', (e) => {
+                 if (e.target.matches('.bilingual-input')) {
+                    const { id, lang } = e.target.dataset;
+                    const image = activeImageGallery.items.find(i => i.id === id);
+                    if(image) {
+                        image.description[lang] = e.target.value;
+                        markUnsavedChanges();
+                    }
+                }
+            });
+
+
+            imageViewerPrevBtn.onclick = () => {
+                activeImageIndex = (activeImageIndex - 1 + activeImageGallery.items.length) % activeImageGallery.items.length;
+                renderActiveImageInViewer();
+            };
+            imageViewerNextBtn.onclick = () => {
+                activeImageIndex = (activeImageIndex + 1) % activeImageGallery.items.length;
+                renderActiveImageInViewer();
+            };
+            closeImageViewerBtn.onclick = closeImageViewer;
+
+            imageFileInput.onchange = (e) => {
+                const files = e.target.files;
+                if (!files.length) return;
+
+                let parentItem;
+                if (imageUploadTarget.isSubstep) {
+                    const step = currentSteps.find(s => s.id === activeStepIdForSubsteps);
+                    parentItem = step.substeps.find(ss => ss.id === imageUploadTarget.parentId);
+                } else {
+                    parentItem = currentSteps.find(s => s.id === imageUploadTarget.parentId);
+                }
+
+                if (!parentItem) return;
+                if (!parentItem.images) parentItem.images = [];
+
+                for (const file of files) {
+                    const newImage = {
+                        id: `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                        path: `Imagenes/${file.name}`,
+                        description: { es: "Añade una descripción.", en: "Add a description." }
+                    };
+                    parentItem.images.push(newImage);
+                }
+
+                markUnsavedChanges();
+                imageUploadTarget.isSubstep ? renderSubsteps() : render();
+                e.target.value = '';
+            };
+
+
+            // Initial render
+            render();
+        });
+    </script>
+
+</body>
+
+</html>
